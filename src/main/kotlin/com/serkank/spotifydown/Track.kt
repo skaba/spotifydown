@@ -55,17 +55,26 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
         val url = downloadResponse?.link
         logger.info { "Downloading track ${file.path}" }
 
-        do {
-            file.toPath().deleteIfExists()
+        val size = restClientBuilder
+            .build()
+            .get()
+            .uri(url!!)
+            .exchange(FileWriter(file))
+
+        if(size == 0L) {
+            logger.error { "Server returned empty response for ${file.path}" }
+        }
+
+/*        do {
             val size = restClientBuilder
                 .build()
                 .get()
                 .uri(url!!)
                 .exchange(FileWriter(file))
             if(size == 0L) {
-                Thread.sleep(1000L)
+                Thread.sleep(5000L)
             }
-        } while (size == 0L)
+        } while (size == 0L)*/
 /*        restClientBuilder
             .build()
             .get()
@@ -78,7 +87,9 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
             request: HttpRequest,
             response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse
         ): Long {
-            response.body.use { input -> file.outputStream().use { output -> input.copyTo(output) } }
+            if(response.headers.contentLength != 0L) {
+                response.body.use { input -> file.outputStream().use { output -> input.copyTo(output) } }
+            }
             return response.headers.contentLength
         }
     }

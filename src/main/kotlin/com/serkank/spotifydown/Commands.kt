@@ -20,11 +20,11 @@ class Commands {
         val matchResult = ALL_URL_PATTERN.toRegex().find(url)
         val type = enumValueOf<Type>(matchResult?.groupValues?.get(1).toString().uppercase())
         val id = matchResult?.groupValues?.get(2)
-        when(type) {
-            Type.TRACK -> Track(id!!, restClientBuilder).download()
+
+         when(type) {
+            Type.TRACK ->  Track(id!!, restClientBuilder).download()
             Type.ALBUM -> TODO()
             Type.PLAYLIST -> Playlist(id!!, restClientBuilder).download()
         }
-        logger.info { "downloaded" }
     }
 }
