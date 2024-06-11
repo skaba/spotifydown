@@ -1,8 +1,10 @@
 package com.serkank.spotifydown
 
 import com.serkank.spotifydown.dto.TrackListResponse
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
+import org.springframework.web.client.RestClient
 
-abstract class Container(id: String) : Downloadable(id) {
+abstract class Container(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id, restClientBuilder) {
     abstract fun getTracks(offset: Int?) : TrackListResponse
 
     fun resolveTracks(): List<Track> {
@@ -17,7 +19,7 @@ abstract class Container(id: String) : Downloadable(id) {
         return responses
             .stream()
             .flatMap { r -> r.trackList.stream() }
-            .map {  t -> Track(t.id) }
+            .map {  t -> Track(t.id, restClientBuilder) }
             .toList()
     }
 
