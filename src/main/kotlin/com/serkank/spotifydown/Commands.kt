@@ -16,15 +16,21 @@ class Commands {
 
     @Command
     fun download(@Pattern(regexp = ALL_URL_PATTERN, message = "Not a valid Spotify URL") url: String) {
-        logger.info {"Downloading $url" }
+        logger.info { "Downloading $url" }
         val matchResult = ALL_URL_PATTERN.toRegex().find(url)
         val type = enumValueOf<Type>(matchResult?.groupValues?.get(1).toString().uppercase())
         val id = matchResult?.groupValues?.get(2)
 
-         when(type) {
-            Type.TRACK ->  Track(id!!, restClientBuilder).download()
+        when (type) {
+            Type.TRACK -> Track(id!!, restClientBuilder).download()
             Type.ALBUM -> TODO()
             Type.PLAYLIST -> Playlist(id!!, restClientBuilder).download()
         }
+    }
+
+    @Command
+    fun downloadFile(filename: String, deleteAfter: Boolean = false) {
+        logger.info { "Downloading from $filename" }
+        FileTracks(filename, restClientBuilder, deleteAfter).download()
     }
 }

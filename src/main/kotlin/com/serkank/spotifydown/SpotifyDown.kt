@@ -9,5 +9,5 @@ import org.springframework.shell.command.annotation.CommandScan
 class SpotifyDown
 
 fun main(args: Array<String>) {
-	runApplication<SpotifyDown>(*args)
+    runApplication<SpotifyDown>(*args)
 }
