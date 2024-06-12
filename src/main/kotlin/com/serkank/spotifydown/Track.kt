@@ -58,7 +58,7 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
             .contentDisposition
             .filename
 
-        val file = File(fileName)
+        val file = File(fileName!!)
         if (file.exists()) {
             logger.info { "${file.path} already downloaded, skipping" }
             return
@@ -69,7 +69,7 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
         restClientBuilder
             .build()
             .get()
-            .uri(url!!)
+            .uri(url)
             .exchange { _, response ->
                 if (response.headers.contentLength == 0L) {
                     logger.error { "Server returned empty response for ${file.path}" }
