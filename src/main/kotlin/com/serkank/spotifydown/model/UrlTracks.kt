@@ -1,9 +1,8 @@
-package com.serkank.spotifydown
+package com.serkank.spotifydown.model
 
 import com.serkank.spotifydown.dto.TrackListResponse
 import com.serkank.spotifydown.service.SpotifyDownService
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.toEntity
 
 abstract class UrlTracks(id: String, restClientBuilder: RestClient.Builder, spotifyDownService: SpotifyDownService) :
     Tracks(id, restClientBuilder, spotifyDownService) {

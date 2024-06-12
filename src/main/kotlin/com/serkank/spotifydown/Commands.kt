@@ -1,5 +1,6 @@
 package com.serkank.spotifydown
 
+import com.serkank.spotifydown.model.*
 import com.serkank.spotifydown.service.SpotifyDownService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Pattern

@@ -1,4 +1,4 @@
-package com.serkank.spotifydown
+package com.serkank.spotifydown.model
 
 import com.serkank.spotifydown.service.SpotifyDownService
 import org.springframework.web.client.RestClient

@@ -1,5 +1,6 @@
-package com.serkank.spotifydown
+package com.serkank.spotifydown.model
 
+import com.serkank.spotifydown.MISSING_FILE
 import com.serkank.spotifydown.service.SpotifyDownService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.web.client.RestClient

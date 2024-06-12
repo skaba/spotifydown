@@ -1,4 +1,4 @@
-package com.serkank.spotifydown
+package com.serkank.spotifydown.model
 
 enum class Type {
     TRACK,
