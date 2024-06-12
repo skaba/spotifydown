@@ -1,9 +1,9 @@
 package com.serkank.spotifydown
 
-import com.serkank.spotifydown.model.Type.FILE
 import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
-import com.serkank.spotifydown.service.resolver.Resolver
+import com.serkank.spotifydown.service.resolver.CompositeResolver
+import com.serkank.spotifydown.service.resolver.FileResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Pattern
 import org.springframework.shell.command.annotation.Command
@@ -13,7 +13,11 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 @Command
-class Commands(private val resolvers: List<Resolver>, private val trackDownloaderService: TrackDownloaderService) {
+class Commands(
+    private val compositeResolver: CompositeResolver,
+    private val fileResolver: FileResolver,
+    private val trackDownloaderService: TrackDownloaderService
+) {
 
     @Command
     fun download(
@@ -22,14 +26,14 @@ class Commands(private val resolvers: List<Resolver>, private val trackDownloade
     ) {
         logger.info { "Downloading $url" }
         val (type, id) = Url(url)
-        val tracks = resolvers.find { resolver -> type == resolver.getType() }!!.resolveTracks(id)
+        val tracks = compositeResolver.resolveTracks(type, id)
         trackDownloaderService.download(tracks, dryRun)
     }
 
     @Command
     fun downloadFile(filename: String, deleteAfter: Boolean = false) {
         logger.info { "Downloading from $filename" }
-        val tracks = resolvers.find { resolver -> resolver.getType() == FILE }!!.resolveTracks(filename)
+        val tracks = fileResolver.resolveTracks(filename)
         if (deleteAfter) {
             File(filename).delete()
         }

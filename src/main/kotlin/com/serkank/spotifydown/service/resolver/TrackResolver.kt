@@ -6,7 +6,7 @@ import com.serkank.spotifydown.model.Type.TRACK
 import org.springframework.stereotype.Service
 
 @Service
-class TrackResolver : Resolver {
+class TrackResolver : AppearsInFile {
     override fun getType(): Type {
         return TRACK
     }
