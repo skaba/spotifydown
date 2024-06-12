@@ -6,12 +6,4 @@ import org.springframework.web.client.RestClient
 
 abstract class Downloadable(val id: String, val restClientBuilder: RestClient.Builder) {
     abstract fun download()
-
-    fun request(url: String): Request {
-        return Request
-            .get(url)
-            .addHeader(REFERER, HEADER)
-            .addHeader("ORIGIN", HEADER)
-    }
-
 }
