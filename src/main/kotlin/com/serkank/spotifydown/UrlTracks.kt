@@ -2,10 +2,22 @@ package com.serkank.spotifydown
 
 import com.serkank.spotifydown.dto.TrackListResponse
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
 
 abstract class UrlTracks(id: String, restClientBuilder: RestClient.Builder) : Tracks(id, restClientBuilder) {
 
-    abstract fun getTracks(offset: Int?): TrackListResponse
+    abstract fun getUrl(offset: Int?): String
+
+    fun getTracks(offset: Int?): TrackListResponse {
+
+        return restClientBuilder
+            .build()
+            .get()
+            .uri(getUrl(offset))
+            .retrieve()
+            .toEntity<TrackListResponse>()
+            .body!!
+    }
 
     override fun resolveTracks(): List<Track> {
         val responses: MutableList<TrackListResponse> = mutableListOf()

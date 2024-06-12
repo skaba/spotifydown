@@ -2,7 +2,6 @@ package com.serkank.spotifydown
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Pattern
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.shell.command.annotation.Command
 import org.springframework.web.client.RestClient
 
@@ -20,7 +19,7 @@ class Commands(private val restClientBuilder: RestClient.Builder) {
 
         when (type) {
             Type.TRACK -> Track(id, restClientBuilder).download()
-            Type.ALBUM -> TODO()
+            Type.ALBUM -> Album(id, restClientBuilder).download()
             Type.PLAYLIST -> Playlist(id, restClientBuilder).download()
         }
     }
