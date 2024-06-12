@@ -1,21 +1,17 @@
 package com.serkank.spotifydown
 
-import com.serkank.spotifydown.dto.DownloadResponse
+import com.serkank.spotifydown.service.SpotifyDownService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.web.client.RestClient
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
-class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id, restClientBuilder) {
+class Track(id: String, restClientBuilder: RestClient.Builder, spotifyDownService: SpotifyDownService) :
+    Downloadable(id, restClientBuilder, spotifyDownService) {
 
-    override fun download() {
-        val downloadResponse = restClientBuilder
-            .build()
-            .get()
-            .uri("https://api.spotifydown.com/download/$id")
-            .retrieve()
-            .body(DownloadResponse::class.java)
+    override fun download(dryRun: Boolean) {
+        val downloadResponse = spotifyDownService.download(id)
 
         val url = downloadResponse?.link
 
@@ -36,6 +32,9 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
         }
 
         logger.info { "Downloading track ${file.path}" }
+        if (dryRun) {
+            return
+        }
 
         restClientBuilder
             .build()
