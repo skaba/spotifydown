@@ -1,17 +1,19 @@
 package com.serkank.spotifydown
 
-import com.serkank.spotifydown.model.*
-import com.serkank.spotifydown.service.SpotifyDownService
+import com.serkank.spotifydown.model.Type
+import com.serkank.spotifydown.model.Type.FILE
+import com.serkank.spotifydown.service.TrackDownloaderService
+import com.serkank.spotifydown.service.resolver.Resolver
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Pattern
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
-import org.springframework.web.client.RestClient
+import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
 @Command
-class Commands(private val restClientBuilder: RestClient.Builder, private val spotifyDownService: SpotifyDownService) {
+class Commands(private val resolvers: List<Resolver>, private val trackDownloaderService: TrackDownloaderService) {
 
     @Command
     fun download(
@@ -23,18 +25,17 @@ class Commands(private val restClientBuilder: RestClient.Builder, private val sp
         val type = enumValueOf<Type>(matchResult?.groupValues?.get(1).toString().uppercase())
         val id = matchResult?.groupValues?.get(2)!!
 
-        val downloadable = when (type) {
-            Type.TRACK -> Track(id, restClientBuilder, spotifyDownService)
-            Type.ALBUM -> Album(id, restClientBuilder, spotifyDownService)
-            Type.PLAYLIST -> Playlist(id, restClientBuilder, spotifyDownService)
-        }
-
-        downloadable.download(dryRun)
+        val tracks = resolvers.find { resolver -> type == resolver.getType() }!!.resolveTracks(id)
+        trackDownloaderService.download(tracks, dryRun)
     }
 
     @Command
     fun downloadFile(filename: String, deleteAfter: Boolean = false) {
         logger.info { "Downloading from $filename" }
-        FileTracks(filename, restClientBuilder, spotifyDownService, deleteAfter).download(false)
+        val tracks = resolvers.find { resolver -> resolver.getType() == FILE }!!.resolveTracks(filename)
+        if (deleteAfter) {
+            File(filename).delete()
+        }
+        trackDownloaderService.download(tracks, false)
     }
 }
