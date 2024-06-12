@@ -45,14 +45,25 @@ class Track(id: String, restClientBuilder: RestClient.Builder) : Downloadable(id
             .uri("https://api.spotifydown.com/download/$id")
             .retrieve()
             .body(DownloadResponse::class.java)
-        val fileName =
-            "${downloadResponse?.metadata?.artists} - ${downloadResponse?.metadata?.title}.mp3".replace('/', '_')
+
+        val url = downloadResponse?.link
+
+        val fileName = restClientBuilder
+            .build()
+            .head()
+            .uri(url!!)
+            .retrieve()
+            .toBodilessEntity()
+            .headers
+            .contentDisposition
+            .filename
+
         val file = File(fileName)
         if (file.exists()) {
             logger.info { "${file.path} already downloaded, skipping" }
             return
         }
-        val url = downloadResponse?.link
+
         logger.info { "Downloading track ${file.path}" }
 
         restClientBuilder

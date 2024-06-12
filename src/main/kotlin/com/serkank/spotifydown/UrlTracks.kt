@@ -35,7 +35,7 @@ abstract class UrlTracks(id: String, restClientBuilder: RestClient.Builder) : Tr
             .toList()
     }
 
-    val tracks: MutableList<Track> = mutableListOf()
+    private val tracks: MutableList<Track> = mutableListOf()
 
     init {
         tracks.addAll(resolveTracks())
