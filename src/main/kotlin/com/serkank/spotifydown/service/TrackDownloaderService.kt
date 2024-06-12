@@ -57,7 +57,11 @@ class TrackDownloaderService(
                     logger.error { "Server returned empty response for ${file.path}" }
                     MISSING_FILE.appendText("https://open.spotify.com/track/${track.id}${System.lineSeparator()}")
                 } else {
-                    response.body.use { input -> file.outputStream().use { output -> input.copyTo(output) } }
+                    response.body.use { input ->
+                        file.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
                 }
             }
     }

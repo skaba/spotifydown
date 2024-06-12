@@ -10,7 +10,6 @@ private val logger = KotlinLogging.logger {}
 @Service
 class CompositeResolver(private val resolvers: List<AppearsInFile>) {
     fun resolveTracks(type: Type, id: String): List<Track> {
-        logger.info { "$resolvers" }
         return resolvers.find { resolver -> resolver.getType() == type }!!.resolveTracks(id)
     }
 }
