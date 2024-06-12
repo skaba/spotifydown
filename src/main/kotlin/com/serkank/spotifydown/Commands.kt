@@ -6,6 +6,8 @@ import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
+import org.springframework.shell.command.CommandRegistration.OptionArity.ONE_OR_MORE
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
 import java.io.File
@@ -21,12 +23,20 @@ class Commands(
 
     @Command
     fun download(
-        @Pattern(regexp = ALL_URL_PATTERN, message = "Not a valid Spotify URL") url: String,
+        @Option(longNames = ["url"], arity = ONE_OR_MORE) urls:
+        @Size(min = 1)
+        List<@Pattern(regexp = ALL_URL_PATTERN, message = "Not a valid Spotify URL") String>,
         @Option(longNames = ["dry-run"]) dryRun: Boolean = false
     ) {
-        logger.info { "Downloading $url" }
-        val (type, id) = Url(url)
-        val tracks = compositeResolver.resolveTracks(type, id)
+        logger.info { "Downloading $urls" }
+
+        val tracks = urls
+            .stream()
+            .flatMap { url ->
+                val (type, id) = Url(url)
+                compositeResolver.resolveTracks(type, id).stream()
+            }
+            .toList()
         trackDownloaderService.download(tracks, dryRun)
     }
 
