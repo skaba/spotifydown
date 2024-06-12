@@ -25,12 +25,6 @@ abstract class UrlTracks(id: String, restClientBuilder: RestClient.Builder, spot
             .toList()
     }
 
-    private val tracks: MutableList<Track> = mutableListOf()
-
-    init {
-        tracks.addAll(resolveTracks())
-    }
-
     fun offset(offset: Int?): String {
         return if (offset != null) "?offset=$offset" else ""
     }
