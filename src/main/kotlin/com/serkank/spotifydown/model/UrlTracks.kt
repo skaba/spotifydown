@@ -14,7 +14,7 @@ abstract class UrlTracks(id: String, restClientBuilder: RestClient.Builder, spot
         var response = getTracks(null)
         responses.add(response)
         while (response.nextOffset != null) {
-            response = getTracks(response.nextOffset?.toInt())
+            response = getTracks(response.nextOffset)
             responses.add(response)
         }
 
