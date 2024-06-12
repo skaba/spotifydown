@@ -1,7 +1,7 @@
 package com.serkank.spotifydown
 
-import com.serkank.spotifydown.model.Type
 import com.serkank.spotifydown.model.Type.FILE
+import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.Resolver
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -21,10 +21,7 @@ class Commands(private val resolvers: List<Resolver>, private val trackDownloade
         @Option(longNames = ["dry-run"]) dryRun: Boolean = false
     ) {
         logger.info { "Downloading $url" }
-        val matchResult = ALL_URL_PATTERN.toRegex().find(url)
-        val type = enumValueOf<Type>(matchResult?.groupValues?.get(1).toString().uppercase())
-        val id = matchResult?.groupValues?.get(2)!!
-
+        val (type, id) = Url(url)
         val tracks = resolvers.find { resolver -> type == resolver.getType() }!!.resolveTracks(id)
         trackDownloaderService.download(tracks, dryRun)
     }
