@@ -17,12 +17,11 @@ class FileResolver(private val compositeResolver: CompositeResolver) : Resolver 
         val file = File(id)
         val tracks = file
             .readLines()
-            .stream()
             .map(String::trim)
             .filter(String::isNotBlank)
-            .flatMap { url ->
-                val (type, trackId) = Url(url)
-                compositeResolver.resolveTracks(type, trackId).stream()
+            .flatMap {
+                val (type, trackId) = Url(it)
+                compositeResolver.resolveTracks(type, trackId)
             }
             .toList()
 

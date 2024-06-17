@@ -25,16 +25,15 @@ class Commands(
     fun download(
         @Option(longNames = ["url"], arity = ONE_OR_MORE) urls:
         @Size(min = 1)
-        List<@Pattern(regexp = ALL_URL_PATTERN, message = "Not a valid Spotify URL") String>,
+        List<@Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL") String>,
         @Option(longNames = ["dry-run"]) dryRun: Boolean = false
     ) {
-        logger.info { "Downloading $urls" }
+        logger.info { "Downloading ${urls.joinToString()}" }
 
         val tracks = urls
-            .stream()
-            .flatMap { url ->
-                val (type, id) = Url(url)
-                compositeResolver.resolveTracks(type, id).stream()
+            .flatMap {
+                val (type, id) = Url(it)
+                compositeResolver.resolveTracks(type, id)
             }
             .toList()
         trackDownloaderService.download(tracks, dryRun)

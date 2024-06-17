@@ -16,9 +16,9 @@ abstract class UrlResolver() : AppearsInFile {
         }
 
         return responses
-            .stream()
-            .flatMap { r -> r.trackList.stream() }
-            .map { t -> Track(t.id) }
+            .map(TrackListResponse::trackList)
+            .flatten()
+            .map { Track(it.id) }
             .toList()
     }
 }
