@@ -19,9 +19,6 @@ class FileResolver(private val compositeResolver: CompositeResolver) : Resolver 
             .lineSequence()
             .map(String::trim)
             .filter(String::isNotBlank)
-            .flatMap {
-                val (type, trackId) = Url(it)
-                compositeResolver.resolveTracks(type, trackId)
-            }
+            .flatMap { compositeResolver.resolveTracks(Url(it)) }
     }
 }
