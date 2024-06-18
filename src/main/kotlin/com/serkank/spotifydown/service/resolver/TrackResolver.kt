@@ -11,7 +11,7 @@ class TrackResolver : AppearsInFile {
         return TRACK
     }
 
-    override fun resolveTracks(id: String): List<Track> {
-        return listOf(Track(id))
+    override fun resolveTracks(id: String): Sequence<Track> {
+        return sequenceOf(Track(id))
     }
 }

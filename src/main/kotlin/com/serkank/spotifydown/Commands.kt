@@ -31,11 +31,11 @@ class Commands(
         logger.info { "Downloading ${urls.joinToString()}" }
 
         val tracks = urls
+            .asSequence()
             .flatMap {
                 val (type, id) = Url(it)
                 compositeResolver.resolveTracks(type, id)
             }
-            .toList()
         trackDownloaderService.download(tracks, dryRun)
     }
 

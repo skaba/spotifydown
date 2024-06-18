@@ -13,18 +13,15 @@ class FileResolver(private val compositeResolver: CompositeResolver) : Resolver 
         return FILE
     }
 
-    override fun resolveTracks(id: String): List<Track> {
-        val file = File(id)
-        val tracks = file
-            .readLines()
+    override fun resolveTracks(id: String): Sequence<Track> {
+        return File(id)
+            .bufferedReader()
+            .lineSequence()
             .map(String::trim)
             .filter(String::isNotBlank)
             .flatMap {
                 val (type, trackId) = Url(it)
                 compositeResolver.resolveTracks(type, trackId)
             }
-            .toList()
-
-        return tracks
     }
 }

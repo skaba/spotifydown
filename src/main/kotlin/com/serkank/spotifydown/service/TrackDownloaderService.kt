@@ -15,8 +15,8 @@ class TrackDownloaderService(
     private val restClientBuilder: RestClient.Builder
 ) {
 
-    fun download(tracks: List<Track>, dryRun: Boolean) {
-        logger.info { "Downloading ${tracks.size} tracks" }
+    fun download(tracks: Sequence<Track>, dryRun: Boolean) {
+        logger.info { "Downloading tracks" }
         for (track: Track in tracks) {
             download(track, dryRun)
         }
