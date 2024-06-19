@@ -1,7 +1,9 @@
 package com.serkank.spotifydown.model
 
-import kotlin.test.*
 import com.serkank.spotifydown.model.Type.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class UrlTest {
     @Test

@@ -3,7 +3,6 @@ package com.serkank.spotifydown.service.resolver
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Type.*
 import com.serkank.spotifydown.model.Url
-import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

@@ -28,10 +28,14 @@ class Config {
         val restClient = restClientBuilder
             .defaultHeader(REFERER, HEADER)
             .defaultHeader("ORIGIN", HEADER)
-            .baseUrl("https://api.spotifydown.com/").build()
-        val adapter = RestClientAdapter.create(restClient)
-        val factory = HttpServiceProxyFactory.builderFor(adapter).build()
-
-        return factory.createClient(SpotifyDownService::class.java)
+            .baseUrl("https://api.spotifydown.com/")
+            .build()
+        val adapter = RestClientAdapter
+            .create(restClient)
+        val factory = HttpServiceProxyFactory
+            .builderFor(adapter)
+            .build()
+        return factory
+            .createClient(SpotifyDownService::class.java)
     }
 }
