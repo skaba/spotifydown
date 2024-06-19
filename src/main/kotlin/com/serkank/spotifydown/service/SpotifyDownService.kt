@@ -10,9 +10,10 @@ interface SpotifyDownService {
     @GetExchange("/download/{id}")
     fun download(@PathVariable id: String): DownloadResponse
 
-    @GetExchange("/trackList/playlist/{id}")
-    fun getPlaylistTracks(@PathVariable id: String, @RequestParam(required = false) offset: Int?): TrackListResponse
-
-    @GetExchange("/trackList/album/{id}")
-    fun getAlbumTracks(@PathVariable id: String, @RequestParam(required = false) offset: Int?): TrackListResponse
+    @GetExchange("/trackList/{type}/{id}")
+    fun getTracks(
+        @PathVariable type: String,
+        @PathVariable id: String,
+        @RequestParam(required = false) offset: Int?
+    ): TrackListResponse
 }

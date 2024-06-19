@@ -1,10 +1,11 @@
 package com.serkank.spotifydown.service
 
-import com.serkank.spotifydown.MISSING_FILE
+import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
@@ -18,7 +19,12 @@ class TrackDownloaderService(
     fun download(tracks: Sequence<Track>, dryRun: Boolean) {
         logger.info { "Downloading tracks" }
         for (track: Track in tracks) {
-            download(track, dryRun)
+            try {
+                download(track, dryRun)
+            } catch (e: RestClientException) {
+                logger.error { "Error downloading ${e.message}" }
+                logMissing(track)
+            }
         }
     }
 
@@ -55,7 +61,7 @@ class TrackDownloaderService(
             .exchange { _, response ->
                 if (response.headers.contentLength == 0L) {
                     logger.error { "Server returned empty response for ${file.path}" }
-                    MISSING_FILE.appendText("https://open.spotify.com/track/${track.id}${System.lineSeparator()}")
+                    logMissing(track)
                 } else {
                     response.body.use { input ->
                         file.outputStream().use { output ->

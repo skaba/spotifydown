@@ -32,7 +32,7 @@ class Commands(
 
         val tracks = urls
             .asSequence()
-            .flatMap {  compositeResolver.resolveTracks(Url(it))  }
+            .flatMap { compositeResolver.resolveTracks(Url(it)) }
         trackDownloaderService.download(tracks, dryRun)
     }
 
