@@ -12,6 +12,7 @@ abstract class UrlResolver(private val spotifyDownService: SpotifyDownService) :
         )
             .map(TrackListResponse::trackList)
             .flatten()
+            .distinct()
             .map { Track(it.id) }
     }
 

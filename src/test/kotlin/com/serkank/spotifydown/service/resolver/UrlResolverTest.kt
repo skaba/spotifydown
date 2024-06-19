@@ -19,7 +19,7 @@ abstract class UrlResolverTest<T : UrlResolver>(clazz: KClass<T>) {
     }
 
     private val returnValue2 = mock<TrackListResponse>() {
-        on { trackList } doReturn (101..150).map(Int::toString).map { TrackList(it) }.toList()
+        on { trackList } doReturn (100..150).map(Int::toString).map { TrackList(it) }.toList()
     }
 
     private val spotifyDownService = mock<SpotifyDownService>() {
