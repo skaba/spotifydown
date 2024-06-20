@@ -19,6 +19,7 @@ class FileResolver(private val compositeResolver: CompositeResolver) : Resolver 
             .lineSequence()
             .map(String::trim)
             .filter(String::isNotBlank)
+            .distinct()
             .mapToTracks(compositeResolver)
     }
 }

@@ -13,7 +13,7 @@ fun logMissing(track: Track) {
     MISSING_FILE.appendText("https://open.spotify.com/track/${track.id}${System.lineSeparator()}")
 }
 
-fun Sequence<String>.mapToTracks(compositeResolver: CompositeResolver) : Sequence<Track> {
+fun Sequence<String>.mapToTracks(compositeResolver: CompositeResolver): Sequence<Track> {
     return this.flatMap { compositeResolver.resolveTracks(Url(it)) }
 }
 

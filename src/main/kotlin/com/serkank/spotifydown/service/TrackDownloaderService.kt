@@ -29,21 +29,9 @@ class TrackDownloaderService(
     }
 
     private fun download(track: Track, dryRun: Boolean) {
-        val downloadResponse = spotifyDownService.download(track.id)
+        val (url, filename) = getDownloadInfo(track)
 
-        val url = downloadResponse.link
-
-        val fileName = restClientBuilder
-            .build()
-            .head()
-            .uri(url)
-            .retrieve()
-            .toBodilessEntity()
-            .headers
-            .contentDisposition
-            .filename
-
-        val file = File(fileName!!)
+        val file = File(filename!!)
         if (file.exists()) {
             logger.info { "${file.path} already downloaded, skipping" }
             return
@@ -70,5 +58,22 @@ class TrackDownloaderService(
                     }
                 }
             }
+    }
+
+    private fun getDownloadInfo(track: Track): Pair<String, String?> {
+        val downloadResponse = spotifyDownService.download(track.id)
+
+        val url = downloadResponse.link
+
+        val filename = restClientBuilder
+            .build()
+            .head()
+            .uri(url)
+            .retrieve()
+            .toBodilessEntity()
+            .headers
+            .contentDisposition
+            .filename
+        return Pair(url, filename)
     }
 }
