@@ -14,6 +14,8 @@ fun logMissing(track: Track) {
 }
 
 fun Sequence<String>.mapToTracks(compositeResolver: CompositeResolver): Sequence<Track> {
-    return this.flatMap { compositeResolver.resolveTracks(Url(it)) }
+    return this
+        .flatMap { compositeResolver.resolveTracks(Url(it)) }
+        .distinct()
 }
 
