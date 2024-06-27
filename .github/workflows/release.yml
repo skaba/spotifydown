@@ -2,11 +2,11 @@ name: Publish releases on new tag
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-    #tags:
-    #  - '*'
+  #  branches: [ main ]
+  #pull_request:
+  #  branches: [ main ]
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -17,8 +17,6 @@ jobs:
             packages: man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
             version: 1.0
       - uses: actions/checkout@v3
-      #- name: Install dependencies for linux-springboot-packager
-      #  run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget nsis
       - name: Download linux-springboot-packager
         run: wget https://github.com/hdsdi3g/linux-springboot-packager/releases/download/0.8.0/linux-springboot-packager-0.8.0.deb
       - name: Install linux-springboot-packager
@@ -33,3 +31,33 @@ jobs:
         run : make-springboot-deb .
       - name: create RPM package
         run: make-springboot-rpm .
+      - name: Extract RPM file name
+        run: echo "RPM_FILE=$(find . -type f -name "*.rpm")" >> $GITHUB_ENV
+      - name: Extract DEB file name
+        run: echo "DEB_FILE=$(find . -maxdepth 1 -type f -name "*.deb")" >> $GITHUB_ENV
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Deb package
+        id: upload-deb-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.DEB_FILE }}
+      - name: Upload RPM package
+        id: upload-rpm-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.RPM_FILE }}
