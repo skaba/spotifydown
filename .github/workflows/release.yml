@@ -12,10 +12,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+            packages: man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
+            version: 1.0
       - uses: actions/checkout@v3
-      - name: Install dependencies for linux-springboot-packager
-        run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
+      #- name: Install dependencies for linux-springboot-packager
+      #  run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget nsis
       - name: Download linux-springboot-packager
         run: wget https://github.com/hdsdi3g/linux-springboot-packager/releases/download/0.8.0/linux-springboot-packager-0.8.0.deb
-      - name: install linux-springboot-packager
+      - name: Install linux-springboot-packager
         run: sudo dpkg -i linux-springboot-packager-0.8.0.deb
+      - name: Install JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: create Deb package
+        run : make-springboot-deb .
+      - name: create RPM package
+        run: make-springboot-rpm .

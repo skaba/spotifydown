@@ -35,3 +35,6 @@ build/
 down
 .mvn
 *.log
+*.deb
+*.rpm
+*.exe

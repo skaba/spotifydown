@@ -1,0 +1,11 @@
+% spotifydown(1) spotifydown documentation
+spotifydown
+
+# NAME
+spotifydown - Download Spotify tracks as MP3
+
+# SYNOPSIS
+spotifydown *&lt;download|download-file&gt;* &lt;url|file&gt;
+
+# DESCRIPTION
+Download Spotify tracks as MP3
