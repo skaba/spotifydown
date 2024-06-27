@@ -34,7 +34,6 @@ jobs:
       - name: Extract DEB file name
         run: echo "DEB_FILE=$(find . -type f -name "spotifydown*.deb")" >> $GITHUB_ENV
       - name: Create Release
-        id: create_release
-      - uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1
         with:
-            artifacts: "${{ env.RPM_FILE }},${{ env.DEB_FILE }}"
+          artifacts: "${{ env.RPM_FILE }},${{ env.DEB_FILE }}"
