@@ -13,5 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install deps
-        run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian
+      - name: Install dependencies for linux-springboot-packager
+        run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
+      - name: Download linux-springboot-packager
+        run: wget https://github.com/hdsdi3g/linux-springboot-packager/releases/download/0.8.0/linux-springboot-packager-0.8.0.deb
+      - name: install linux-springboot-packager
+        run: sudo dpkg -i linux-springboot-packager-0.8.0.deb
