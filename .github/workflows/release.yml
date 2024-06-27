@@ -12,11 +12,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-            packages: man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
-            version: 1.0
       - uses: actions/checkout@v3
+      - name: Install linux-springboot-packager dependencies
+        run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
       - name: Download linux-springboot-packager
         run: wget https://github.com/hdsdi3g/linux-springboot-packager/releases/download/0.8.0/linux-springboot-packager-0.8.0.deb
       - name: Install linux-springboot-packager
