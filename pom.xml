@@ -127,6 +127,40 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>de.perdian.maven.plugins</groupId>
+                <artifactId>macosappbundler-maven-plugin</artifactId>
+                <version>1.20.1</version>
+                <configuration>
+                    <plist>
+                        <JVMMainClassName>com.serkank.spotifydown.SpotifyDownKt</JVMMainClassName>
+                        <JVMVersion>21+</JVMVersion>
+                    </plist>
+                    <app>
+                        <additionalResources>
+                            <resource>
+                                <directory>${project.basedir}/src/main/resources</directory>
+                                <outputDirectory>Contents/Resources</outputDirectory>
+                                <includes>
+                                    <include>**</include>
+                                </includes>
+                            </resource>
+                        </additionalResources>
+                    </app>
+                    <dmg>
+                        <generate>true</generate>
+                        <useGenIsoImage>true</useGenIsoImage>
+                    </dmg>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
