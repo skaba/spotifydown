@@ -2,7 +2,6 @@ package com.serkank.spotifydown
 
 import com.serkank.spotifydown.service.SpotifyDownService
 import kotlinx.serialization.json.Json
-import org.apache.hc.core5.http.HttpHeaders.REFERER
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter
@@ -26,7 +25,7 @@ class Config {
     @Bean
     fun spotifyDownService(restClientBuilder: RestClient.Builder): SpotifyDownService {
         val restClient = restClientBuilder
-            .defaultHeader(REFERER, HEADER)
+            .defaultHeader("REFERER", HEADER)
             .defaultHeader("ORIGIN", HEADER)
             .baseUrl("https://api.spotifydown.com/")
             .build()
