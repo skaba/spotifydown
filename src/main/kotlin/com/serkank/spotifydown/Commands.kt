@@ -48,7 +48,7 @@ class Commands(
             >,
         @Option(longNames = ["file"], shortNames = ['f']) filename: String,
     ) {
-        logger.info { "Downloading ${urls.joinToString()}" }
+        logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = File(filename)
         urls
             .asSequence()
