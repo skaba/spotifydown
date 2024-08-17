@@ -18,9 +18,9 @@ class TrackDownloaderService(
 
     fun download(tracks: Sequence<Track>, dryRun: Boolean) {
         logger.info { "Downloading tracks" }
-        for (track: Track in tracks) {
+        tracks.forEachIndexed { index, track ->
             try {
-                download(track, dryRun)
+                download(index, track, dryRun)
             } catch (e: RestClientException) {
                 logger.error { "Error downloading ${e.message}" }
                 logMissing(track)
@@ -28,16 +28,16 @@ class TrackDownloaderService(
         }
     }
 
-    private fun download(track: Track, dryRun: Boolean) {
+    private fun download(index: Int, track: Track, dryRun: Boolean) {
         val (url, filename) = getDownloadInfo(track)
 
         val file = File(filename!!)
         if (file.exists()) {
-            logger.info { "${file.path} already downloaded, skipping" }
+            logger.info { "${index + 1}) ${file.path} already downloaded, skipping" }
             return
         }
 
-        logger.info { "Downloading track ${file.path}" }
+        logger.info { "${index + 1}) Downloading track ${file.path}" }
         if (dryRun) {
             return
         }
