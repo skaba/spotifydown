@@ -13,10 +13,12 @@ private val logger = KotlinLogging.logger {}
 @Service
 class TrackDownloaderService(
     private val spotifyDownService: SpotifyDownService,
-    private val restClientBuilder: RestClient.Builder
+    private val restClientBuilder: RestClient.Builder,
 ) {
-
-    fun download(tracks: Sequence<Track>, dryRun: Boolean) {
+    fun download(
+        tracks: Sequence<Track>,
+        dryRun: Boolean,
+    ) {
         logger.info { "Downloading tracks" }
         tracks.forEachIndexed { index, track ->
             try {
@@ -28,7 +30,11 @@ class TrackDownloaderService(
         }
     }
 
-    private fun download(index: Int, track: Track, dryRun: Boolean) {
+    private fun download(
+        index: Int,
+        track: Track,
+        dryRun: Boolean,
+    ) {
         val (url, filename) = getDownloadInfo(track)
 
         val file = File(filename!!)
@@ -65,15 +71,16 @@ class TrackDownloaderService(
 
         val url = downloadResponse.link
 
-        val filename = restClientBuilder
-            .build()
-            .head()
-            .uri(url)
-            .retrieve()
-            .toBodilessEntity()
-            .headers
-            .contentDisposition
-            .filename
+        val filename =
+            restClientBuilder
+                .build()
+                .head()
+                .uri(url)
+                .retrieve()
+                .toBodilessEntity()
+                .headers
+                .contentDisposition
+                .filename
         return Pair(url, filename)
     }
 }

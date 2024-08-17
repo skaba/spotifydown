@@ -17,26 +17,50 @@ private val logger = KotlinLogging.logger {}
 class Commands(
     private val compositeResolver: CompositeResolver,
     private val fileResolver: FileResolver,
-    private val trackDownloaderService: TrackDownloaderService
+    private val trackDownloaderService: TrackDownloaderService,
 ) {
-
     @Command
     fun download(
-        @Option(longNames = ["url"], arity = ONE_OR_MORE) urls:
-        @Size(min = 1)
-        List<@Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL") String>,
-        @Option(longNames = ["dry-run"]) dryRun: Boolean = false
+        @Option(longNames = ["url"], shortNames = ['u'], arity = ONE_OR_MORE) urls:
+            @Size(min = 1)
+            List<
+                @Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL")
+                String,
+            >,
+        @Option(longNames = ["dry-run"]) dryRun: Boolean = false,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
 
-        val tracks = urls
-            .asSequence()
-            .mapToTracks(compositeResolver)
+        val tracks =
+            urls
+                .asSequence()
+                .mapToTracks(compositeResolver)
         trackDownloaderService.download(tracks, dryRun)
     }
 
     @Command
-    fun downloadFile(filename: String, deleteAfter: Boolean = false) {
+    fun dump(
+        @Option(longNames = ["url"], shortNames = ['u'], arity = ONE_OR_MORE) urls:
+            @Size(min = 1)
+            List<
+                @Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL")
+                String,
+            >,
+        @Option(longNames = ["file"], shortNames = ['f']) filename: String,
+    ) {
+        logger.info { "Downloading ${urls.joinToString()}" }
+        val file = File(filename)
+        urls
+            .asSequence()
+            .mapToTracks(compositeResolver)
+            .forEach { appendTrackUrl(it, file) }
+    }
+
+    @Command
+    fun downloadFile(
+        @Option(longNames = ["file"], shortNames = ['f']) filename: String,
+        @Option(longNames = ["delete-after"]) deleteAfter: Boolean = false,
+    ) {
         logger.info { "Downloading from $filename" }
         val tracks = fileResolver.resolveTracks(filename)
         if (deleteAfter) {

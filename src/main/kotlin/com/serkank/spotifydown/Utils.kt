@@ -10,12 +10,17 @@ const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
 fun logMissing(track: Track) {
-    MISSING_FILE.appendText("https://open.spotify.com/track/${track.id}${System.lineSeparator()}")
+    appendTrackUrl(track, MISSING_FILE)
 }
 
-fun Sequence<String>.mapToTracks(compositeResolver: CompositeResolver): Sequence<Track> {
-    return this
+fun Sequence<String>.mapToTracks(compositeResolver: CompositeResolver): Sequence<Track> =
+    this
         .flatMap { compositeResolver.resolveTracks(Url(it)) }
         .distinct()
-}
 
+fun appendTrackUrl(
+    track: Track,
+    file: File,
+) {
+    file.appendText("https://open.spotify.com/track/${track.id}${System.lineSeparator()}")
+}

@@ -7,11 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TrackResolver : AppearsInFile {
-    override fun getType(): Type {
-        return TRACK
-    }
+    override fun getType(): Type = TRACK
 
-    override fun resolveTracks(id: String): Sequence<Track> {
-        return sequenceOf(Track(id))
-    }
+    override fun resolveTracks(id: String): Sequence<Track> = sequenceOf(Track(id))
 }
