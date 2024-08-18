@@ -1,5 +1,7 @@
 package com.serkank.spotifydown
 
+import com.serkank.spotifydown.model.Track
+import com.serkank.spotifydown.model.url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
@@ -9,7 +11,9 @@ import jakarta.validation.constraints.Size
 import org.springframework.shell.command.CommandRegistration.OptionArity.ONE_OR_MORE
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
+import reactor.core.publisher.Flux.fromIterable
 import java.io.File
+import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,12 +34,10 @@ class Commands(
         @Option(longNames = ["dry-run"]) dryRun: Boolean = false,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
-
         val tracks =
-            urls
-                .asSequence()
+            fromIterable(urls)
                 .mapToTracks(compositeResolver)
-        trackDownloaderService.download(tracks, dryRun)
+        trackDownloaderService.download(tracks, dryRun).then().block()
     }
 
     @Command
@@ -49,11 +51,12 @@ class Commands(
         @Option(longNames = ["file"], shortNames = ['f']) filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
-        val file = File(filename)
-        urls
-            .asSequence()
+        val file = Path.of(filename)
+        fromIterable(urls)
             .mapToTracks(compositeResolver)
-            .forEach { appendTrackUrl(it, file) }
+            .map(Track::url)
+            .writeToFile(file)
+            .block()
     }
 
     @Command
@@ -66,6 +69,6 @@ class Commands(
         if (deleteAfter) {
             File(filename).delete()
         }
-        trackDownloaderService.download(tracks, false)
+        trackDownloaderService.download(tracks, false).then().block()
     }
 }
