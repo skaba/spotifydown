@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.io.File
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption.CREATE_NEW
 import java.nio.file.StandardOpenOption.WRITE
 import kotlin.io.path.appendText
@@ -22,7 +21,7 @@ const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|pl
 const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
-fun logMissing(track: Track): Mono<Void> = appendTrackUrl(track, MISSING_FILE)
+fun logMissing(track: Track): Mono<Void> = { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.toMono().then()
 
 fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this
@@ -30,35 +29,19 @@ fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> 
             compositeResolver.resolveTracks(Url(it))
         }.distinct()
 
-fun Flux<String>.writeToFile(path: Path): Mono<Void> =
-    writeRows(
-        this,
-        path,
-        CREATE_NEW,
-        WRITE,
-    )
-
-fun appendTrackUrl(
-    track: Track,
-    file: File,
-): Mono<Void> = { file.appendText(track.url() + System.lineSeparator()) }.toMono().then()
-
-fun writeRows(
-    rowsFlux: Flux<String>,
-    path: Path,
-    vararg options: StandardOpenOption,
-): Mono<Void> {
+fun Flux<String>.writeToFile(path: Path): Mono<Void> {
     val bufferFactory = DefaultDataBufferFactory()
     val encoder = CharSequenceEncoder.textPlainOnly()
 
     val dataBufferFlux =
-        rowsFlux
+        this
             .map { it + System.lineSeparator() }
             .map { encoder.encodeValue(it, bufferFactory, ResolvableType.NONE, null, null) }
 
     return DataBufferUtils.write(
         dataBufferFlux,
         path,
-        *options,
+        CREATE_NEW,
+        WRITE,
     )
 }
