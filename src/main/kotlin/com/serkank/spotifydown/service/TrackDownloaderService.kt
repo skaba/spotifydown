@@ -3,6 +3,7 @@ package com.serkank.spotifydown.service
 import com.serkank.spotifydown.dto.DownloadResponse
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
+import com.serkank.spotifydown.model.url
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -31,7 +32,13 @@ class TrackDownloaderService(
     ): Flux<Void> {
         logger.info { "Downloading tracks" }
         return tracks
-            .flatMap { download(it, dryRun) }
+            .flatMap { track ->
+                download(track, dryRun)
+                    .onErrorResume { e ->
+                        logger.error(e) { "Error downloading track  ${track.url()}" }
+                        return@onErrorResume logMissing(track)
+                    }
+            }
     }
 
     private fun download(
@@ -63,6 +70,9 @@ class TrackDownloaderService(
                         } else {
                             return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then()
                         }
+                    }.onErrorResume { e ->
+                        logger.error(e) { "Error downloading $path" }
+                        return@onErrorResume logMissing(track)
                     }.then()
             }
 
@@ -70,6 +80,7 @@ class TrackDownloaderService(
         val url =
             spotifyDownService
                 .download(track.id)
+                .doOnError { e -> logger.error(e) { "Error requesting download info for track ${track.url()}" } }
                 .map(DownloadResponse::link)
                 .cache()
 
@@ -82,6 +93,7 @@ class TrackDownloaderService(
                         .uri(it)
                         .retrieve()
                         .toBodilessEntity()
+                        .doOnError { e -> logger.error(e) { "Error requesting filename info for track ${track.url()}" } }
                 }.map { it.headers.contentDisposition.filename }
 
         return Mono.zip(url, filename)
