@@ -1,7 +1,7 @@
 package com.serkank.spotifydown
 
 import com.serkank.spotifydown.model.Track
-import com.serkank.spotifydown.model.url
+import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
@@ -36,6 +36,7 @@ class Commands(
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
             fromIterable(urls)
+                .map(Url::invoke)
                 .mapToTracks(compositeResolver)
         trackDownloaderService.download(tracks, dryRun).then().block()
     }
@@ -53,6 +54,7 @@ class Commands(
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = Path.of(filename)
         fromIterable(urls)
+            .map(Url::invoke)
             .mapToTracks(compositeResolver)
             .map(Track::url)
             .writeToFile(file)

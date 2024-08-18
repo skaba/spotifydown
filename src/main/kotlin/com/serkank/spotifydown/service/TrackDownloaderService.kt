@@ -3,7 +3,6 @@ package com.serkank.spotifydown.service
 import com.serkank.spotifydown.dto.DownloadResponse
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
-import com.serkank.spotifydown.model.url
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils

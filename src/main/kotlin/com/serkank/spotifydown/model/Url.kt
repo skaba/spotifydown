@@ -15,4 +15,6 @@ data class Url(
             return Url(type, id)
         }
     }
+
+    override fun toString(): String = "https://open.spotify.com/${type.name.lowercase()}/${this.id}"
 }

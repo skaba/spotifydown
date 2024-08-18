@@ -2,7 +2,6 @@ package com.serkank.spotifydown
 
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Url
-import com.serkank.spotifydown.model.url
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import org.springframework.core.ResolvableType
 import org.springframework.core.codec.CharSequenceEncoder
@@ -23,16 +22,14 @@ private val MISSING_FILE = File("missing.txt")
 
 fun logMissing(track: Track): Mono<Void> = { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.toMono().then()
 
-fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
+fun Flux<Url>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this
-        .flatMap {
-            compositeResolver.resolveTracks(Url(it))
-        }.distinct()
+        .flatMap { compositeResolver.resolveTracks(it) }
+        .distinct()
 
 fun Flux<String>.writeToFile(path: Path): Mono<Void> {
     val bufferFactory = DefaultDataBufferFactory()
     val encoder = CharSequenceEncoder.textPlainOnly()
-
     val dataBufferFlux =
         this
             .map { it + System.lineSeparator() }
