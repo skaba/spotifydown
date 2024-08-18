@@ -8,18 +8,17 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class FileResolver(private val compositeResolver: CompositeResolver) : Resolver {
-    override fun getType(): Type {
-        return FILE
-    }
+class FileResolver(
+    private val compositeResolver: CompositeResolver,
+) : Resolver {
+    override fun getType(): Type = FILE
 
-    override fun resolveTracks(id: String): Sequence<Track> {
-        return File(id)
+    override fun resolveTracks(id: String): Sequence<Track> =
+        File(id)
             .bufferedReader()
             .lineSequence()
             .map(String::trim)
             .filter(String::isNotBlank)
             .distinct()
             .mapToTracks(compositeResolver)
-    }
 }

@@ -6,9 +6,8 @@ enum class Type {
     TRACK,
     ALBUM,
     PLAYLIST,
-    FILE;
+    FILE,
+    ;
 
-    override fun toString(): String {
-        return super.toString().lowercase(ROOT)
-    }
+    override fun toString(): String = super.toString().lowercase(ROOT)
 }

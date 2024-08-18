@@ -2,7 +2,10 @@ package com.serkank.spotifydown.model
 
 import com.serkank.spotifydown.SPOTIFY_URL_PATTERN
 
-data class Url(val type: Type, val id: String) {
+data class Url(
+    val type: Type,
+    val id: String,
+) {
     companion object {
         operator fun invoke(url: String): Url {
             val regex = SPOTIFY_URL_PATTERN.toRegex()

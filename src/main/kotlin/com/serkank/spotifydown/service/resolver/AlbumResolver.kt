@@ -6,8 +6,8 @@ import com.serkank.spotifydown.service.SpotifyDownService
 import org.springframework.stereotype.Service
 
 @Service
-class AlbumResolver(spotifyDownService: SpotifyDownService) : UrlResolver(spotifyDownService) {
-    override fun getType(): Type {
-        return ALBUM
-    }
+class AlbumResolver(
+    spotifyDownService: SpotifyDownService,
+) : UrlResolver(spotifyDownService) {
+    override fun getType(): Type = ALBUM
 }
