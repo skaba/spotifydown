@@ -1,5 +1,6 @@
 package com.serkank.spotifydown
 
+import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
@@ -53,7 +54,7 @@ class Commands(
         val file = Path.of(filename)
         fromIterable(urls)
             .mapToTracks(compositeResolver)
-            .map { it.url() }
+            .map(Track::url)
             .writeToFile(file)
             .block()
     }

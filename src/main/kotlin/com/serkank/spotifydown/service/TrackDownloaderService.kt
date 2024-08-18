@@ -1,5 +1,6 @@
 package com.serkank.spotifydown.service
 
+import com.serkank.spotifydown.dto.DownloadResponse
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -69,7 +70,7 @@ class TrackDownloaderService(
         val url =
             spotifyDownService
                 .download(track.id)
-                .map { it.link }
+                .map(DownloadResponse::link)
                 .cache()
 
         val filename =

@@ -1,5 +1,6 @@
 package com.serkank.spotifydown.service.resolver
 
+import com.serkank.spotifydown.dto.TrackList
 import com.serkank.spotifydown.dto.TrackListResponse
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.service.SpotifyDownService
@@ -15,7 +16,8 @@ abstract class UrlResolver(
             .expand { if (it.nextOffset == null) empty() else getTracks(id, it.nextOffset) }
             .flatMapIterable(TrackListResponse::trackList)
             .distinct()
-            .map { Track(it.id) }
+            .map(TrackList::id)
+            .map(::Track)
 
     private fun getTracks(
         id: String,
