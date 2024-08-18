@@ -35,7 +35,7 @@ class TrackDownloaderService(
             .flatMap { track ->
                 download(track, dryRun)
                     .onErrorResume { e ->
-                        logger.error(e) { "Error downloading track  ${track.url()}" }
+                        logger.error { "Error downloading track ${track.url()}, reason: ${e.message}" }
                         return@onErrorResume logMissing(track)
                     }
             }
@@ -71,16 +71,16 @@ class TrackDownloaderService(
                             return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then()
                         }
                     }.onErrorResume { e ->
-                        logger.error(e) { "Error downloading $path" }
+                        logger.error { "Error downloading $path, reason: ${e.message}" }
                         return@onErrorResume logMissing(track)
-                    }.then()
-            }
+                    }
+            }.then()
 
     private fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
         val url =
             spotifyDownService
                 .download(track.id)
-                .doOnError { e -> logger.error(e) { "Error requesting download info for track ${track.url()}" } }
+                .doOnError { e -> logger.error { "Error requesting download info for track ${track.url()}, reason: ${e.message}" } }
                 .map(DownloadResponse::link)
                 .cache()
 
@@ -93,7 +93,7 @@ class TrackDownloaderService(
                         .uri(it)
                         .retrieve()
                         .toBodilessEntity()
-                        .doOnError { e -> logger.error(e) { "Error requesting filename info for track ${track.url()}" } }
+                        .doOnError { e -> logger.error { "Error requesting filename info for track ${track.url()}, reason: ${e.message}" } }
                 }.map { it.headers.contentDisposition.filename }
 
         return Mono.zip(url, filename)

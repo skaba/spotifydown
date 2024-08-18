@@ -11,6 +11,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption.CREATE_NEW
@@ -19,7 +20,7 @@ import kotlin.io.path.appendText
 
 const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|playlist|album)\/([^\s?]+)(\?.*)?"""
 const val HEADER = "https://spotifydown.com"
-private val MISSING_FILE = Path.of("missing.txt")
+private val MISSING_FILE = File("missing.txt")
 
 fun logMissing(track: Track): Mono<Void> = appendTrackUrl(track, MISSING_FILE)
 
@@ -39,8 +40,8 @@ fun Flux<String>.writeToFile(path: Path): Mono<Void> =
 
 fun appendTrackUrl(
     track: Track,
-    path: Path,
-): Mono<Void> = { path.appendText(track.url()) }.toMono().then()
+    file: File,
+): Mono<Void> = { file.appendText(track.url() + System.lineSeparator()) }.toMono().then()
 
 fun writeRows(
     rowsFlux: Flux<String>,
