@@ -9,6 +9,7 @@ import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.Mono.empty
 import reactor.kotlin.core.publisher.toMono
 import java.io.File
 import java.nio.file.Path
@@ -20,7 +21,10 @@ val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
-fun logMissing(track: Track): Mono<Void> = { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.toMono().then()
+fun logMissing(track: Track): Mono<Track> =
+    { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.toMono().then(
+        empty(),
+    )
 
 fun Flux<Url>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this

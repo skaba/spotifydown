@@ -38,7 +38,11 @@ class Commands(
             fromIterable(urls)
                 .map(Url::invoke)
                 .mapToTracks(compositeResolver)
-        trackDownloaderService.download(tracks, dryRun).then().block()
+        val count =
+            trackDownloaderService
+                .download(tracks, dryRun)
+                .block()
+        logger.info { "Downloaded $count track(s)" }
     }
 
     @Command
@@ -71,6 +75,10 @@ class Commands(
         if (deleteAfter) {
             File(filename).delete()
         }
-        trackDownloaderService.download(tracks, false).then().block()
+        val count =
+            trackDownloaderService
+                .download(tracks, false)
+                .block()
+        logger.info { "Downloaded $count track(s)" }
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
+import reactor.core.publisher.Mono.just
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
 import reactor.util.function.Tuple2
@@ -28,7 +29,7 @@ class TrackDownloaderService(
     fun download(
         tracks: Flux<Track>,
         dryRun: Boolean,
-    ): Flux<Void> {
+    ): Mono<Long> {
         logger.info { "Downloading tracks" }
         return tracks
             .flatMap { track ->
@@ -37,13 +38,13 @@ class TrackDownloaderService(
                         logger.error { "Error downloading track ${track.url()}, reason: ${e.message}" }
                         return@onErrorResume logMissing(track)
                     }
-            }
+            }.count()
     }
 
     private fun download(
         track: Track,
         dryRun: Boolean,
-    ): Mono<Void> =
+    ): Mono<Track> =
         getDownloadInfo(track)
             .flatMap { (url, filename) ->
                 val path = Paths.get(filename!!)
@@ -67,13 +68,13 @@ class TrackDownloaderService(
                             logger.error { "Server returned empty response for $path" }
                             return@flatMap logMissing(track)
                         } else {
-                            return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then()
+                            return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then(just(track))
                         }
                     }.onErrorResume { e ->
                         logger.error { "Error downloading $path, reason: ${e.message}" }
                         return@onErrorResume logMissing(track)
                     }
-            }.then()
+            }
 
     private fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
         val url =
