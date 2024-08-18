@@ -15,9 +15,9 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.CREATE_NEW
 import java.nio.file.StandardOpenOption.WRITE
-import kotlin.io.path.appendText
 
 const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|playlist|album)\/([^\s?]+)(\?.*)?"""
+val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 

@@ -1,6 +1,6 @@
 package com.serkank.spotifydown.model
 
-import com.serkank.spotifydown.SPOTIFY_URL_PATTERN
+import com.serkank.spotifydown.SPOTIFY_URL_REGEX
 
 data class Url(
     val type: Type,
@@ -8,8 +8,7 @@ data class Url(
 ) {
     companion object {
         operator fun invoke(url: String): Url {
-            val regex = SPOTIFY_URL_PATTERN.toRegex()
-            val matchResult = regex.find(url)
+            val matchResult = SPOTIFY_URL_REGEX.find(url)
             val type =
                 enumValueOf<Type>(requireNotNull(matchResult) { "Invalid Spotify URL: $url" }.groupValues[1].uppercase())
             val id = matchResult.groupValues[2]
