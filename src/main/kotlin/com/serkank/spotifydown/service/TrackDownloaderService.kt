@@ -3,84 +3,86 @@ package com.serkank.spotifydown.service
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClientException
-import java.io.File
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.core.publisher.Mono.empty
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
+import reactor.util.function.Tuple2
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
+import kotlin.io.path.exists
 
 private val logger = KotlinLogging.logger {}
 
 @Service
 class TrackDownloaderService(
     private val spotifyDownService: SpotifyDownService,
-    private val restClientBuilder: RestClient.Builder,
+    private val webClientBuilder: WebClient.Builder,
 ) {
     fun download(
-        tracks: Sequence<Track>,
+        tracks: Flux<Track>,
         dryRun: Boolean,
-    ) {
+    ): Flux<Void> {
         logger.info { "Downloading tracks" }
-        tracks.forEachIndexed { index, track ->
-            try {
-                download(index, track, dryRun)
-            } catch (e: RestClientException) {
-                logger.error { "Error downloading ${e.message}" }
-                logMissing(track)
-            }
-        }
+        return tracks
+            .flatMap { download(it, dryRun) }
     }
 
     private fun download(
-        index: Int,
         track: Track,
         dryRun: Boolean,
-    ) {
-        val (url, filename) = getDownloadInfo(track)
-
-        val file = File(filename!!)
-        if (file.exists()) {
-            logger.info { "${index + 1}) ${file.path} already downloaded, skipping" }
-            return
-        }
-
-        logger.info { "${index + 1}) Downloading track ${file.path}" }
-        if (dryRun) {
-            return
-        }
-
-        restClientBuilder
-            .build()
-            .get()
-            .uri(url)
-            .exchange { _, response ->
-                if (response.headers.contentLength == 0L) {
-                    logger.error { "Server returned empty response for ${file.path}" }
-                    logMissing(track)
-                } else {
-                    response.body.use { input ->
-                        file.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
+    ): Mono<Void> =
+        getDownloadInfo(track)
+            .flatMap { (url, filename) ->
+                val path = Paths.get(filename!!)
+                if (path.exists()) {
+                    logger.info { "$path already downloaded, skipping" }
+                    return@flatMap empty()
                 }
+                logger.info { "Downloading track $path" }
+                if (dryRun) {
+                    return@flatMap empty()
+                }
+
+                return@flatMap webClientBuilder
+                    .build()
+                    .get()
+                    .uri(url)
+                    .retrieve()
+                    .toEntityFlux(DataBuffer::class.java)
+                    .flatMap {
+                        if (it.headers.contentLength == 0L) {
+                            logger.error { "Server returned empty response for $path" }
+                            return@flatMap logMissing(track)
+                        } else {
+                            return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then()
+                        }
+                    }.then()
             }
-    }
 
-    private fun getDownloadInfo(track: Track): Pair<String, String?> {
-        val downloadResponse = spotifyDownService.download(track.id)
-
-        val url = downloadResponse.link
+    private fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
+        val url =
+            spotifyDownService
+                .download(track.id)
+                .map { it.link }
+                .cache()
 
         val filename =
-            restClientBuilder
-                .build()
-                .head()
-                .uri(url)
-                .retrieve()
-                .toBodilessEntity()
-                .headers
-                .contentDisposition
-                .filename
-        return Pair(url, filename)
+            url
+                .flatMap {
+                    webClientBuilder
+                        .build()
+                        .head()
+                        .uri(it)
+                        .retrieve()
+                        .toBodilessEntity()
+                }.map { it.headers.contentDisposition.filename }
+
+        return Mono.zip(url, filename)
     }
 }

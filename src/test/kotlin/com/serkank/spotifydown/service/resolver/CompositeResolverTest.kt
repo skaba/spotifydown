@@ -1,21 +1,24 @@
 package com.serkank.spotifydown.service.resolver
 
 import com.serkank.spotifydown.model.Track
-import com.serkank.spotifydown.model.Type.*
+import com.serkank.spotifydown.model.Type.ALBUM
+import com.serkank.spotifydown.model.Type.FILE
+import com.serkank.spotifydown.model.Type.PLAYLIST
+import com.serkank.spotifydown.model.Type.TRACK
 import com.serkank.spotifydown.model.Url
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
+import reactor.core.publisher.Flux.empty
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 @SpringBootTest
 class CompositeResolverTest {
-
     val id: String = "ID"
-    val returnValue = emptySequence<Track>()
+    val returnValue = empty<Track>()
 
     @SpyBean
     lateinit var playlistResolver: PlaylistResolver
@@ -34,7 +37,6 @@ class CompositeResolverTest {
         `when`(playlistResolver.resolveTracks(id)).thenReturn(returnValue)
         assertSame(returnValue, compositeResolver.resolveTracks(Url(PLAYLIST, id)))
     }
-
 
     @Test
     fun testAlbumResolver() {
