@@ -1,22 +1,25 @@
-package com.serkank.spotifydown
+package com.serkank.spotifydown.shell
 
+import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
+import com.serkank.spotifydown.validator.ValidSpotifyUrl
+import com.serkank.spotifydown.writeToFile
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import org.springframework.shell.command.CommandRegistration.OptionArity.ONE_OR_MORE
+import org.springframework.shell.command.CommandRegistration
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
-import reactor.core.publisher.Flux.fromIterable
+import reactor.core.publisher.Flux
 import java.io.File
 import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}
 
+// @Validated
 @Command
 class Commands(
     private val compositeResolver: CompositeResolver,
@@ -25,18 +28,17 @@ class Commands(
 ) {
     @Command
     fun download(
-        @Option(longNames = ["url"], shortNames = ['u'], arity = ONE_OR_MORE) urls:
-            @Size(min = 1)
-            List<
-                @Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL")
-                String,
-            >,
-        @Option(longNames = ["dry-run"]) dryRun: Boolean = false,
+        @Option(longNames = ["url"], shortNames = ['u'], arity = CommandRegistration.OptionArity.ONE_OR_MORE)
+        @Size(min = 1)
+        @ValidSpotifyUrl
+        urls: List<String>,
+        @Option(longNames = ["dry-run"], shortNames = ['d']) dryRun: Boolean = false,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
-            fromIterable(urls)
-                .map(Url::invoke)
+            Flux
+                .fromIterable(urls)
+                .map(Url.Companion::invoke)
                 .mapToTracks(compositeResolver)
         val count =
             trackDownloaderService
@@ -47,18 +49,17 @@ class Commands(
 
     @Command
     fun dump(
-        @Option(longNames = ["url"], shortNames = ['u'], arity = ONE_OR_MORE) urls:
-            @Size(min = 1)
-            List<
-                @Pattern(regexp = SPOTIFY_URL_PATTERN, message = "Not a valid Spotify URL")
-                String,
-            >,
+        @Option(longNames = ["url"], shortNames = ['u'], arity = CommandRegistration.OptionArity.ONE_OR_MORE)
+        @Size(min = 1)
+        @ValidSpotifyUrl
+        urls: List<String>,
         @Option(longNames = ["file"], shortNames = ['f']) filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = Path.of(filename)
-        fromIterable(urls)
-            .map(Url::invoke)
+        Flux
+            .fromIterable(urls)
+            .map(Url.Companion::invoke)
             .mapToTracks(compositeResolver)
             .map(Track::url)
             .writeToFile(file)

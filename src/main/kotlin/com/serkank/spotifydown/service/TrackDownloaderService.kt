@@ -76,7 +76,7 @@ class TrackDownloaderService(
                     }
             }
 
-    private fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
+    public fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
         val url =
             spotifyDownService
                 .download(track.id)
