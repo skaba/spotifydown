@@ -19,7 +19,6 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}
 
-// @Validated
 @Command
 class Commands(
     private val compositeResolver: CompositeResolver,

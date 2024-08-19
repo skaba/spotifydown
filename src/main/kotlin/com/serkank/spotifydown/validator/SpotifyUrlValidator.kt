@@ -76,10 +76,12 @@ class SpotifyUrlValidator(
                 OK -> {
                     // Valid do nothing
                 }
+
                 BAD_REQUEST -> {
                     context.buildConstraintViolationWithTemplate(INVALID_SPOTIFY_URL).addConstraintViolation()
                     valid = false
                 }
+
                 NOT_FOUND -> {
                     context.buildConstraintViolationWithTemplate("$url not found").addConstraintViolation()
                     valid = false
@@ -87,16 +89,26 @@ class SpotifyUrlValidator(
 
                 FOUND -> {
                     val expectedLocation = "https://accounts.spotify.com/login?continue=${URLEncoder.encode(url)}"
-                    if (entity.headers.getFirst(LOCATION) != null && entity.headers.getFirst(LOCATION)!!.startsWith(expectedLocation)) {
-                        context.buildConstraintViolationWithTemplate("$url not accessible, private playlist?").addConstraintViolation()
+                    if (entity.headers.getFirst(LOCATION) != null &&
+                        entity.headers
+                            .getFirst(LOCATION)!!
+                            .startsWith(expectedLocation)
+                    ) {
+                        context
+                            .buildConstraintViolationWithTemplate("$url not accessible, private playlist?")
+                            .addConstraintViolation()
                     } else {
-                        context.buildConstraintViolationWithTemplate("Error validating $url ($status)").addConstraintViolation()
+                        context
+                            .buildConstraintViolationWithTemplate("Error validating $url ($status)")
+                            .addConstraintViolation()
                     }
                     valid = false
                 }
 
                 else -> {
-                    context.buildConstraintViolationWithTemplate("Error validating $url ($status)").addConstraintViolation()
+                    context
+                        .buildConstraintViolationWithTemplate("Error validating $url ($status)")
+                        .addConstraintViolation()
                     valid = false
                 }
             }

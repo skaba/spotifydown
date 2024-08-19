@@ -68,7 +68,9 @@ class TrackDownloaderService(
                             logger.error { "Server returned empty response for $path" }
                             return@flatMap logMissing(track)
                         } else {
-                            return@flatMap DataBufferUtils.write(it.body!!, path, StandardOpenOption.CREATE).then(just(track))
+                            return@flatMap DataBufferUtils
+                                .write(it.body!!, path, StandardOpenOption.CREATE)
+                                .then(just(track))
                         }
                     }.onErrorResume { e ->
                         logger.error { "Error downloading $path, reason: ${e.message}" }
@@ -76,7 +78,7 @@ class TrackDownloaderService(
                     }
             }
 
-    public fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
+    fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
         val url =
             spotifyDownService
                 .download(track.id)
