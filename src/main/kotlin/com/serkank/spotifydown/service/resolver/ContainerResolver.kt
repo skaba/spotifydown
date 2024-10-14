@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-abstract class UrlResolver(
+abstract class ContainerResolver(
     private val spotifyDownService: SpotifyDownService,
 ) : AppearsInFile {
     override fun resolveTracks(id: String): Sequence<Track> =

@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-abstract class UrlResolverTest<T : UrlResolver>(
+abstract class ContainerResolverTest<T : ContainerResolver>(
     clazz: KClass<T>,
 ) {
     private val id: String = "ID"
