@@ -6,7 +6,6 @@ import com.serkank.spotifydown.service.SpotifyDownService
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import reactor.core.publisher.Mono.just
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,8 +28,8 @@ abstract class UrlResolverTest<T : UrlResolver>(
 
     private val spotifyDownService =
         mock<SpotifyDownService> {
-            on { getTracks(getType(), id, null) } doReturn just(returnValue1)
-            on { getTracks(getType(), id, 101) } doReturn just(returnValue2)
+            on { getTracks(getType(), id, null) } doReturn returnValue1
+            on { getTracks(getType(), id, 101) } doReturn returnValue2
         }
 
     private val urlResolver = clazz.constructors.first().call(spotifyDownService)
@@ -40,8 +39,7 @@ abstract class UrlResolverTest<T : UrlResolver>(
         val tracks =
             urlResolver
                 .resolveTracks(id)
-                .collectList()
-                .block()
+                .toList()
         verify(spotifyDownService).getTracks(getType(), id, null)
         verify(spotifyDownService).getTracks(getType(), id, 101)
         assertEquals(150, tracks!!.size)

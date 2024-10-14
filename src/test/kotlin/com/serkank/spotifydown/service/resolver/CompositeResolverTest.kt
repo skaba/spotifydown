@@ -10,7 +10,6 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
-import reactor.core.publisher.Flux.empty
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
@@ -18,7 +17,7 @@ import kotlin.test.assertSame
 @SpringBootTest
 class CompositeResolverTest {
     val id: String = "ID"
-    val returnValue = empty<Track>()
+    val returnValue = emptySequence<Track>()
 
     @SpyBean
     lateinit var playlistResolver: PlaylistResolver

@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
-import org.springframework.http.client.ReactorNettyClientRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
@@ -42,7 +41,6 @@ class SpotifyUrlValidator(
 ) : ConstraintValidator<ValidSpotifyUrl, List<String>> {
     private val restClient =
         restClientBuilder
-            .requestFactory(ReactorNettyClientRequestFactory())
             .defaultStatusHandler(
                 { _: HttpStatusCode? -> true },
                 { _: HttpRequest?, _: ClientHttpResponse? -> },

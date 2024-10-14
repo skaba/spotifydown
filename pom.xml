@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -63,7 +63,6 @@
             <groupId>io.projectreactor.kotlin</groupId>
             <artifactId>reactor-kotlin-extensions</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
@@ -73,23 +72,7 @@
             <groupId>xyz.gianlu.librespot</groupId>
             <artifactId>librespot-lib</artifactId>
             <version>1.6.4</version>
-            <!--
-            <exclusions>
-                <exclusion>
-                    <groupId>com.badlogicgames.jlayer</groupId>
-                    <artifactId>jlayer</artifactId>
-                </exclusion>
-            </exclusions>
-            -->
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.github.trilarion</groupId>
-            <artifactId>java-vorbis-support</artifactId>
-            <version>1.2.1</version>
-        </dependency>
-        -->
-
         <dependency>
             <groupId>com.github.umjammer</groupId>
             <artifactId>mp3spi</artifactId>
@@ -100,10 +83,6 @@
             <artifactId>ffsampledsp-complete</artifactId>
             <version>0.9.53</version>
         </dependency>
-
-
-
-
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
