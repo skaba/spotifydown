@@ -2,20 +2,18 @@ package com.serkank.spotifydown.shell
 
 import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.model.Track
-import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
 import com.serkank.spotifydown.validator.ValidSpotifyUrl
-import com.serkank.spotifydown.writeToFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Size
 import org.springframework.shell.command.CommandRegistration
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
-import reactor.core.publisher.Flux
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.appendText
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,14 +33,12 @@ class Commands(
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
-            Flux
-                .fromIterable(urls)
-                .map(Url.Companion::invoke)
+            urls
+                .asSequence()
                 .mapToTracks(compositeResolver)
         val count =
             trackDownloaderService
                 .download(tracks, dryRun)
-                .block()
         logger.info { "Downloaded $count track(s)" }
     }
 
@@ -56,13 +52,11 @@ class Commands(
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = Path.of(filename)
-        Flux
-            .fromIterable(urls)
-            .map(Url.Companion::invoke)
+        urls
+            .asSequence()
             .mapToTracks(compositeResolver)
             .map(Track::url)
-            .writeToFile(file)
-            .block()
+            .forEach { file.appendText(it) }
     }
 
     @Command
@@ -78,7 +72,6 @@ class Commands(
         val count =
             trackDownloaderService
                 .download(tracks, false)
-                .block()
         logger.info { "Downloaded $count track(s)" }
     }
 }
