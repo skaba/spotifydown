@@ -1,20 +1,22 @@
 package com.serkank.spotifydown.service
 
-import com.serkank.spotifydown.dto.DownloadResponse
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
+import com.spotify.metadata.Metadata.AudioFile
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
 import reactor.core.publisher.Mono.just
-import reactor.kotlin.core.util.function.component1
-import reactor.kotlin.core.util.function.component2
-import reactor.util.function.Tuple2
+import reactor.kotlin.core.util.function.*
+import xyz.gianlu.librespot.audio.HaltListener
+import xyz.gianlu.librespot.core.Session
+import xyz.gianlu.librespot.metadata.PlaylistId
+import xyz.gianlu.librespot.metadata.TrackId
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.exists
@@ -25,6 +27,7 @@ private val logger = KotlinLogging.logger {}
 class TrackDownloaderService(
     private val spotifyDownService: SpotifyDownService,
     private val webClientBuilder: WebClient.Builder,
+    private val session: Session,
 ) {
     fun download(
         tracks: Flux<Track>,
@@ -46,58 +49,74 @@ class TrackDownloaderService(
         dryRun: Boolean,
     ): Mono<Track> =
         getDownloadInfo(track)
-            .flatMap { (url, filename) ->
-                val path = Paths.get(filename!!)
+            .flatMap { filename ->
+                val path = Paths.get(filename)
                 if (path.exists()) {
                     logger.info { "$path already downloaded, skipping" }
-                    return@flatMap empty()
+                    empty<Track>()
                 }
                 logger.info { "Downloading track $path" }
                 if (dryRun) {
-                    return@flatMap empty()
+                    empty<Track>()
                 }
 
-                return@flatMap webClientBuilder
-                    .build()
-                    .get()
-                    .uri(url)
-                    .retrieve()
-                    .toEntityFlux(DataBuffer::class.java)
-                    .flatMap {
-                        if (it.headers.contentLength == 0L) {
-                            logger.error { "Server returned empty response for $path" }
-                            return@flatMap logMissing(track)
-                        } else {
-                            return@flatMap DataBufferUtils
-                                .write(it.body!!, path, StandardOpenOption.CREATE)
-                                .then(just(track))
-                        }
-                    }.onErrorResume { e ->
-                        logger.error { "Error downloading $path, reason: ${e.message}" }
-                        return@onErrorResume logMissing(track)
-                    }
+                val input =
+                    session
+                        .contentFeeder()
+                        .load(
+                            TrackId.fromBase62(track.id),
+                            { it.first { it.format == AudioFile.Format.OGG_VORBIS_320 } },
+                            false,
+                            MyHaltListener(),
+                        ).`in`
+                        .stream()
+
+                val buffer =
+                    DataBufferUtils
+                        .readInputStream({ input }, DefaultDataBufferFactory(), 1024 * 1024)
+                DataBufferUtils
+                    .write(buffer, path, StandardOpenOption.CREATE)
+                    .doFinally { input.close() }
+                    .then(just(track))
+
+                /*Mono
+                    .fromSupplier {
+                        session
+                            .contentFeeder()
+                            .load(
+                                TrackId.fromBase62(track.id),
+                                { it.first { it.format == AudioFile.Format.OGG_VORBIS_320 } },
+                                false,
+                                null,
+                            )
+                    }.map { it.`in`.stream() }
+                    .map { DataBufferUtils.readInputStream({ it }, DefaultDataBufferFactory(), 1024 * 1024) }
+                    .map { DataBufferUtils.write(it, path, StandardOpenOption.CREATE) }
+                    .then(just(track))*/
             }
 
-    fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
-        val url =
-            spotifyDownService
-                .download(track.id)
-                .doOnError { e -> logger.error { "Error requesting download info for track ${track.url()}, reason: ${e.message}" } }
-                .map(DownloadResponse::link)
-                .cache()
+    fun getDownloadInfo(track: Track): Mono<String> {
+        val trackId = TrackId.fromBase62(track.id)
+        session.api().getPlaylist(PlaylistId.)
+        return Mono
+            .fromSupplier { session.api().getMetadata4Track(trackId) }
+            // .subscribeOn(Schedulers.boundedElastic())
+            .map { "${it.artistList.joinToString { it.name }} - ${it.name}.ogg" }
+    }
 
-        val filename =
-            url
-                .flatMap {
-                    webClientBuilder
-                        .build()
-                        .head()
-                        .uri(it)
-                        .retrieve()
-                        .toBodilessEntity()
-                        .doOnError { e -> logger.error { "Error requesting filename info for track ${track.url()}, reason: ${e.message}" } }
-                }.map { it.headers.contentDisposition.filename }
+    class MyHaltListener : HaltListener {
+        override fun streamReadHalted(
+            chunk: Int,
+            time: Long,
+        ) {
+            print("Read halted")
+        }
 
-        return Mono.zip(url, filename)
+        override fun streamReadResumed(
+            chunk: Int,
+            time: Long,
+        ) {
+            println("Read resumed")
+        }
     }
 }

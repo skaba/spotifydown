@@ -3,6 +3,7 @@ package com.serkank.spotifydown
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.resolver.CompositeResolver
+import com.spotify.metadata.Metadata
 import org.springframework.core.ResolvableType
 import org.springframework.core.codec.CharSequenceEncoder
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -45,4 +46,20 @@ fun Flux<String>.writeToFile(path: Path): Mono<Void> {
         CREATE_NEW,
         WRITE,
     )
+}
+
+val Metadata.Track.available: Boolean
+    get() = this.availabilityCount > 0
+val Metadata.Track.hasAlternatives: Boolean
+    get() = this.alternativeCount > 0
+
+fun <T> Mono<T>.mapIf(
+    condition: (T) -> Boolean,
+    mapper: (T) -> T,
+) = this.map {
+    if (condition.invoke(it)) {
+        mapper.invoke(it)
+    } else {
+        it
+    }
 }
