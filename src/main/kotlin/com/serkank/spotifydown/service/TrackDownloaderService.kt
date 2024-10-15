@@ -14,25 +14,26 @@ import javax.sound.sampled.AudioSystem
 private val logger = KotlinLogging.logger {}
 
 @Service
-class TrackDownloaderService(
-    private val session: Session,
-) {
+class TrackDownloaderService {
     fun download(
         tracks: Sequence<Track>,
         dryRun: Boolean,
     ): Int {
         logger.info { "Downloading tracks" }
-        return tracks
-            .map { download(it, dryRun) }
-            .filter { it }
-            .count()
+        session().use { session ->
+            return tracks
+                .map { download(it, dryRun, session) }
+                .filter { it }
+                .count()
+        }
     }
 
     private fun download(
         track: Track,
         dryRun: Boolean,
+        session: Session,
     ): Boolean {
-        val filename = getFilename(track)
+        val filename = getFilename(track, session)
         val path = File(filename)
         if (path.exists()) {
             logger.info { "$path already downloaded, skipping" }
@@ -71,8 +72,39 @@ class TrackDownloaderService(
         return true
     }
 
-    fun getFilename(track: Track): String {
+    private fun getFilename(
+        track: Track,
+        session: Session,
+    ): String {
         val trackId = TrackId.fromBase62(track.id)
         return session.api().getMetadata4Track(trackId).let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
+    }
+
+    private fun session(): Session {
+        // val credentialsFile =
+        // credentialsFile.createNewFile()
+        val conf =
+            Session.Configuration
+                .Builder()
+                .setStoreCredentials(true)
+                .setStoredCredentialsFile(File(System.getProperty("user.home"), ".spotify_down"))
+                .setCacheEnabled(false)
+                /*.setStoreCredentials(true)
+                .setStoredCredentialsFile()
+                .setTimeSynchronizationMethod()
+                .setTimeManualCorrection()
+                .setProxyEnabled()
+                .setProxyType()
+                .setProxyAddress()
+                .setProxyPort()
+                .setProxyAuth()
+                .setProxyUsername()
+                .setProxyPassword()
+                .setRetryOnChunkError()                 */
+                .build()
+        return Session
+            .Builder(conf)
+            .oauth()
+            .create()
     }
 }
