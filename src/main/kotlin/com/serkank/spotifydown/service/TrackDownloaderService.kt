@@ -32,7 +32,6 @@ class TrackDownloaderService(
         track: Track,
         dryRun: Boolean,
     ): Boolean {
-        println()
         val filename = getFilename(track)
         val path = File(filename)
         if (path.exists()) {
@@ -63,7 +62,7 @@ class TrackDownloaderService(
                 pcmFormat.channels,
                 -1,
                 -1f,
-                true,
+                false,
                 mapOf("bitrate" to "320"),
             )
         val pcmInputStream = AudioSystem.getAudioInputStream(pcmFormat, ogg)
