@@ -3,6 +3,7 @@ package com.serkank.spotifydown.service
 import com.serkank.spotifydown.model.Track
 import com.spotify.metadata.Metadata
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.*
 import org.springframework.stereotype.Service
 import vavi.sound.sampled.mp3.MpegAudioFileWriter
 import xyz.gianlu.librespot.core.Session
@@ -21,10 +22,19 @@ class TrackDownloaderService {
     ): Int {
         logger.info { "Downloading tracks" }
         session().use { session ->
-            return tracks
-                .map { download(it, dryRun, session) }
-                .filter { it }
-                .count()
+            return runBlocking(Dispatchers.IO) {
+                var downloaded = 0
+                tracks
+                    .map {
+                        async {
+                            download(it, dryRun, session)
+                        }
+                    }.forEach {
+                        val success = it.await()
+                        if (success) downloaded++
+                    }
+                return@runBlocking downloaded
+            }
         }
     }
 
