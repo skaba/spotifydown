@@ -86,7 +86,7 @@ class SpotifyUrlValidator(
                 }
 
                 FOUND -> {
-                    val expectedLocation = "https://accounts.spotify.com/login?continue=${URLEncoder.encode(url)}"
+                    val expectedLocation = "https://accounts.spotify.com/login?continue=${URLEncoder.encode(url, Charsets.UTF_8)}"
                     if (entity.headers.getFirst(LOCATION) != null &&
                         entity.headers
                             .getFirst(LOCATION)!!
