@@ -17,13 +17,13 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
     private val returnValue1 =
         mock<TrackListResponse> {
             on { nextOffset } doReturn 101
-            on { trackList } doReturn (1..100).map(Int::toString).map { TrackList(it) }.toList()
+            on { trackList } doReturn (1..100).map(Int::toString).map(::TrackList)
         }
 
     private val returnValue2 =
         mock<TrackListResponse> {
             on { nextOffset } doReturn null
-            on { trackList } doReturn (100..150).map(Int::toString).map { TrackList(it) }.toList()
+            on { trackList } doReturn (100..150).map(Int::toString).map(::TrackList)
         }
 
     private val spotifyDownService =
@@ -42,7 +42,7 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
                 .toList()
         verify(spotifyDownService).getTracks(getType(), id, null)
         verify(spotifyDownService).getTracks(getType(), id, 101)
-        assertEquals(150, tracks!!.size)
+        assertEquals(150, tracks.size)
     }
 
     abstract fun getType(): String
