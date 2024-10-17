@@ -1,7 +1,7 @@
 package com.serkank.spotifydown.shell
 
+import com.serkank.spotifydown.appendTrackUrl
 import com.serkank.spotifydown.mapToTracks
-import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
@@ -13,7 +13,6 @@ import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
 import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.appendText
 
 private val logger = KotlinLogging.logger {}
 
@@ -55,8 +54,7 @@ class Commands(
         urls
             .asSequence()
             .mapToTracks(compositeResolver)
-            .map(Track::url)
-            .forEach { file.appendText(it) }
+            .forEach { appendTrackUrl(it, file) }
     }
 
     @Command
