@@ -12,7 +12,6 @@ import org.springframework.shell.command.CommandRegistration
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
 import java.io.File
-import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}
 
@@ -50,7 +49,7 @@ class Commands(
         @Option(longNames = ["file"], shortNames = ['f']) filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
-        val file = Path.of(filename)
+        val file = File(filename)
         urls
             .asSequence()
             .mapToTracks(compositeResolver)
