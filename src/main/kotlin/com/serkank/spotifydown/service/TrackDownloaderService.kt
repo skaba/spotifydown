@@ -36,7 +36,7 @@ class TrackDownloaderService(
                 download(track, dryRun)
                     .onErrorResume { e ->
                         logger.error { "Error downloading track ${track.url()}, reason: ${e.message}" }
-                        return@onErrorResume logMissing(track)
+                        logMissing(track)
                     }
             }.count()
     }
@@ -45,19 +45,19 @@ class TrackDownloaderService(
         track: Track,
         dryRun: Boolean,
     ): Mono<Track> =
-        getDownloadInfo(track)
+        getFilename(track)
             .flatMap { (url, filename) ->
                 val path = Paths.get(filename!!)
                 if (path.exists()) {
                     logger.info { "$path already downloaded, skipping" }
-                    return@flatMap empty()
+                    empty<Track>()
                 }
                 logger.info { "Downloading track $path" }
                 if (dryRun) {
-                    return@flatMap empty()
+                    empty<Track>()
                 }
 
-                return@flatMap webClientBuilder
+                webClientBuilder
                     .build()
                     .get()
                     .uri(url)
@@ -66,19 +66,19 @@ class TrackDownloaderService(
                     .flatMap {
                         if (it.headers.contentLength == 0L) {
                             logger.error { "Server returned empty response for $path" }
-                            return@flatMap logMissing(track)
+                            logMissing(track)
                         } else {
-                            return@flatMap DataBufferUtils
+                            DataBufferUtils
                                 .write(it.body!!, path, StandardOpenOption.CREATE)
                                 .then(just(track))
                         }
                     }.onErrorResume { e ->
                         logger.error { "Error downloading $path, reason: ${e.message}" }
-                        return@onErrorResume logMissing(track)
+                        logMissing(track)
                     }
             }
 
-    fun getDownloadInfo(track: Track): Mono<Tuple2<String, String?>> {
+    fun getFilename(track: Track): Mono<Tuple2<String, String?>> {
         val url =
             spotifyDownService
                 .download(track.id)
