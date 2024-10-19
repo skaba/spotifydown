@@ -27,6 +27,12 @@
         <spring-shell.version>3.3.1</spring-shell.version>
         <linux-springboot-packager.kind>cli</linux-springboot-packager.kind>
     </properties>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -57,11 +63,25 @@
             <groupId>io.projectreactor.kotlin</groupId>
             <artifactId>reactor-kotlin-extensions</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
             <version>6.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.gianlu.librespot</groupId>
+            <artifactId>librespot-lib</artifactId>
+            <version>1.6.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.umjammer</groupId>
+            <artifactId>mp3spi</artifactId>
+            <version>1.9.17</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tagtraum</groupId>
+            <artifactId>ffsampledsp-complete</artifactId>
+            <version>0.9.53</version>
         </dependency>
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
