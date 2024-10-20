@@ -9,5 +9,5 @@ import org.springframework.stereotype.Service
 class AlbumResolver(
     spotifyDownService: SpotifyDownService,
 ) : ContainerResolver(spotifyDownService) {
-    override fun getType(): Type = ALBUM
+    override val type: Type = ALBUM
 }

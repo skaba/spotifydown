@@ -11,7 +11,7 @@ import java.io.File
 class FileResolver(
     private val compositeResolver: CompositeResolver,
 ) : Resolver {
-    override fun getType(): Type = FILE
+    override val type: Type = FILE
 
     override fun resolveTracks(id: String): Sequence<Track> =
         File(id)

@@ -4,7 +4,7 @@ import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Type
 
 interface Resolver {
-    fun getType(): Type
+    val type: Type
 
     fun resolveTracks(id: String): Sequence<Track>
 }
