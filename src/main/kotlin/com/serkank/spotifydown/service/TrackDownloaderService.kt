@@ -101,7 +101,7 @@ class TrackDownloaderService {
                 .getMetadata4Track(trackId)
                 .let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
         } catch (e: Exception) {
-            logger.error { "Error downloading ${track.url()}" }
+            logger.error { "Error downloading ${track.url}" }
             logMissing(track)
             return null
         }

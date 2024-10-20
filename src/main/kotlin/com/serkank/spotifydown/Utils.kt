@@ -24,5 +24,5 @@ fun appendTrackUrl(
     track: Track,
     file: File,
 ) {
-    file.appendText("${track.url()}${System.getProperty("line.separator")}")
+    file.appendText("${track.url}${System.getProperty("line.separator")}")
 }

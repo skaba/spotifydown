@@ -24,5 +24,5 @@ abstract class ContainerResolver(
     private fun getTracks(
         id: String,
         offset: Int?,
-    ): TrackListResponse = spotifyDownService.getTracks(getType().toString(), id, offset)
+    ): TrackListResponse = spotifyDownService.getTracks(type.toString(), id, offset)
 }

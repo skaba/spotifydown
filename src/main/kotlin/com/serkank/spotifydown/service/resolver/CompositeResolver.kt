@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class CompositeResolver(
     resolvers: List<AppearsInFile>,
 ) {
-    private final val resolvers: Map<Type, AppearsInFile> = resolvers.associateBy(AppearsInFile::getType)
+    private final val resolvers: Map<Type, AppearsInFile> = resolvers.associateBy(AppearsInFile::type)
 
     fun resolveTracks(url: Url): Sequence<Track> = resolvers[url.type]!!.resolveTracks(url.id)
 }

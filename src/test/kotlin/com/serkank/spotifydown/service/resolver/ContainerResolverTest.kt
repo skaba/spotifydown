@@ -23,14 +23,14 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
             }
         val returnValue2 =
             mock<TrackListResponse> {
-                on { nextOffset } doReturn null
+                on { nextOffset } doReturn noNextOffset
                 on { trackList } doReturn (100..150).map(Int::toString).map(::TrackList)
             }
 
         val spotifyDownService =
             mock<SpotifyDownService> {
-                on { getTracks(getType(), id, null) } doReturn returnValue1
-                on { getTracks(getType(), id, 101) } doReturn returnValue2
+                on { getTracks(type, id, null) } doReturn returnValue1
+                on { getTracks(type, id, 101) } doReturn returnValue2
             }
         val containerResolver = clazz.constructors.first().call(spotifyDownService)
         return containerResolver to spotifyDownService
@@ -43,8 +43,8 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
             containerResolver
                 .resolveTracks(id)
                 .toList()
-        verify(spotifyDownService).getTracks(getType(), id, null)
-        verify(spotifyDownService).getTracks(getType(), id, 101)
+        verify(spotifyDownService).getTracks(type, id, null)
+        verify(spotifyDownService).getTracks(type, id, 101)
         assertEquals(150, tracks.size)
     }
 
@@ -55,10 +55,10 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
             containerResolver
                 .resolveTracks(id)
                 .toList()
-        verify(spotifyDownService).getTracks(getType(), id, null)
-        verify(spotifyDownService).getTracks(getType(), id, 101)
+        verify(spotifyDownService).getTracks(type, id, null)
+        verify(spotifyDownService).getTracks(type, id, 101)
         assertEquals(150, tracks.size)
     }
 
-    abstract fun getType(): String
+    abstract val type: String
 }
