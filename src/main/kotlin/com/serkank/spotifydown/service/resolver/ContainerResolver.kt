@@ -14,7 +14,7 @@ abstract class ContainerResolver(
     override fun resolveTracks(id: String): Sequence<Track> =
         generateSequence(
             { getTracks(id, null) },
-            { if (it.nextOffset == null) null else getTracks(id, it.nextOffset) },
+            { if (it.nextOffset == null || it.nextOffset == 0) null else getTracks(id, it.nextOffset) },
         ).map(TrackListResponse::trackList)
             .flatten()
             .distinct()

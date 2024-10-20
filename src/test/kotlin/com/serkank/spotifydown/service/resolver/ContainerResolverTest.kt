@@ -11,33 +11,48 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 abstract class ContainerResolverTest<T : ContainerResolver>(
-    clazz: KClass<T>,
+    private val clazz: KClass<T>,
 ) {
     private val id: String = "ID"
-    private val returnValue1 =
-        mock<TrackListResponse> {
-            on { nextOffset } doReturn 101
-            on { trackList } doReturn (1..100).map(Int::toString).map(::TrackList)
-        }
 
-    private val returnValue2 =
-        mock<TrackListResponse> {
-            on { nextOffset } doReturn null
-            on { trackList } doReturn (100..150).map(Int::toString).map(::TrackList)
-        }
+    private fun prepareMocks(noNextOffset: Int?): Pair<T, SpotifyDownService> {
+        val returnValue1 =
+            mock<TrackListResponse> {
+                on { nextOffset } doReturn 101
+                on { trackList } doReturn (1..100).map(Int::toString).map(::TrackList)
+            }
+        val returnValue2 =
+            mock<TrackListResponse> {
+                on { nextOffset } doReturn null
+                on { trackList } doReturn (100..150).map(Int::toString).map(::TrackList)
+            }
 
-    private val spotifyDownService =
-        mock<SpotifyDownService> {
-            on { getTracks(getType(), id, null) } doReturn returnValue1
-            on { getTracks(getType(), id, 101) } doReturn returnValue2
-        }
-
-    private val urlResolver = clazz.constructors.first().call(spotifyDownService)
+        val spotifyDownService =
+            mock<SpotifyDownService> {
+                on { getTracks(getType(), id, null) } doReturn returnValue1
+                on { getTracks(getType(), id, 101) } doReturn returnValue2
+            }
+        val containerResolver = clazz.constructors.first().call(spotifyDownService)
+        return containerResolver to spotifyDownService
+    }
 
     @Test
-    fun testResolveTracks() {
+    fun testResolveTracksWithNullOffset() {
+        val (containerResolver, spotifyDownService) = prepareMocks(null)
         val tracks =
-            urlResolver
+            containerResolver
+                .resolveTracks(id)
+                .toList()
+        verify(spotifyDownService).getTracks(getType(), id, null)
+        verify(spotifyDownService).getTracks(getType(), id, 101)
+        assertEquals(150, tracks.size)
+    }
+
+    @Test
+    fun testResolveTracksWithZeroOffset() {
+        val (containerResolver, spotifyDownService) = prepareMocks(0)
+        val tracks =
+            containerResolver
                 .resolveTracks(id)
                 .toList()
         verify(spotifyDownService).getTracks(getType(), id, null)
