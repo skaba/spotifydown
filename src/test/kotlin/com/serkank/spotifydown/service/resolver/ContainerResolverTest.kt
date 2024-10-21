@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-abstract class ContainerResolverResolverTest<T : ContainerResolverResolver>(
+abstract class ContainerResolverTest<T : ContainerResolver>(
     private val clazz: KClass<T>,
 ) {
     private val id: String = "ID"

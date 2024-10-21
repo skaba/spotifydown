@@ -1,5 +1,5 @@
 package com.serkank.spotifydown.service.resolver
 
-class AlbumResolverTest : ContainerResolverResolverTest<AlbumResolver>(AlbumResolver::class) {
+class AlbumResolverTest : ContainerResolverTest<AlbumResolver>(AlbumResolver::class) {
     override val type: String = "album"
 }
