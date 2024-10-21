@@ -6,7 +6,6 @@ import com.spotify.metadata.Metadata
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.io.IOUtils
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
@@ -21,10 +20,7 @@ import javax.sound.sampled.AudioSystem
 private val logger = KotlinLogging.logger {}
 
 @Service
-class TrackDownloaderService(
-    private val spotifyDownService: SpotifyDownService,
-    private val webClientBuilder: WebClient.Builder,
-) {
+class TrackDownloaderService {
     fun download(
         tracks: Flux<Track>,
         dryRun: Boolean,
@@ -48,7 +44,6 @@ class TrackDownloaderService(
         dryRun: Boolean,
         session: Session,
     ): Mono<Track> {
-        // println("Downloading ${track.url()}")
         if (dryRun) {
             return empty()
         }
