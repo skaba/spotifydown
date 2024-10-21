@@ -1,5 +1,5 @@
 package com.serkank.spotifydown.service.resolver
 
-class PlaylistResolverTest : UrlResolverTest<PlaylistResolver>(PlaylistResolver::class) {
+class PlaylistResolverTest : ContainerResolverResolverTest<PlaylistResolver>(PlaylistResolver::class) {
     override fun getType(): String = "playlist"
 }

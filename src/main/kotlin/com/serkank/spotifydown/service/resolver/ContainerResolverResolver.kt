@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
-abstract class UrlResolver(
+abstract class ContainerResolverResolver(
     private val spotifyDownService: SpotifyDownService,
 ) : AppearsInFile {
     override fun resolveTracks(id: String): Flux<Track> =
