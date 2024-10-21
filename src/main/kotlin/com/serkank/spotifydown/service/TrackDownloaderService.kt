@@ -29,28 +29,30 @@ class TrackDownloaderService(
         tracks: Flux<Track>,
         dryRun: Boolean,
     ): Mono<Long> {
-        // val session = session()
+        val session = session()
         logger.info { "Downloading tracks" }
         return tracks
             .flatMap { track ->
-                download(track, dryRun)
+                download(track, dryRun, session)
                     .onErrorResume { e ->
+                        logger.debug(e) { "Error downloading track ${track.url()}, reason: ${e.message}" }
                         logger.error { "Error downloading track ${track.url()}, reason: ${e.message}" }
                         logMissing(track)
                     }
             }.count()
+            .doFinally { session.close() }
     }
 
     private fun download(
         track: Track,
         dryRun: Boolean,
+        session: Session,
     ): Mono<Track> {
-        println("Downloading ${track.url()}")
+        // println("Downloading ${track.url()}")
         if (dryRun) {
             return empty()
         }
 
-        val session = session()
         return getFilename(track, session)
             .flatMap { filename ->
                 val file = File(filename)
@@ -93,32 +95,13 @@ class TrackDownloaderService(
                     AudioSystem.write(mp3InputStream, MpegAudioFileWriter.MP3, output)
                     IOUtils.closeQuietly(output, mp3InputStream, pcmInputStream, input)
                     logger.info { "Downloaded $filename" }
-                }.doOnNext { println("foo") }
-                    .map { track }
-                /*
-
-                webClientBuilder
-                    .build()
-                    .get()
-                    .uri(url)
-                    .retrieve()
-                    .toEntityFlux(DataBuffer::class.java)
-                    .flatMap {
-                        if (it.headers.contentLength == 0L) {
-                            logger.error { "Server returned empty response for $path" }
-                            logMissing(track)
-                        } else {
-                            DataBufferUtils
-                                .write(it.body!!, path, StandardOpenOption.CREATE)
-                                .then(just(track))
-                        }
-                    }.onErrorResume { e ->
-                        logger.error { "Error downloading $path, reason: ${e.message}" }
+                }.map { track }
+                    .onErrorResume { e ->
+                        logger.debug(e) { "Error downloading $file, reason: ${e.message}" }
+                        logger.error { "Error downloading $file, reason: ${e.message}" }
                         logMissing(track)
                     }
-                 */
-            }.doOnNext { println("bar") }
-            .doFinally { session.close() }
+            }
     }
 
     private fun getFilename(
@@ -132,30 +115,10 @@ class TrackDownloaderService(
                 .api()
                 .getMetadata4Track(trackId)
                 .let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
-        }.doOnError { e -> logger.error { "Error downloading ${track.url()}" } }
-
-        /*
-        val url =
-            spotifyDownService
-                .download(track.id)
-                .doOnError { e -> logger.error { "Error requesting download info for track ${track.url()}, reason: ${e.message}" } }
-                .map(DownloadResponse::link)
-                .cache()
-
-        val filename =
-            url
-                .flatMap {
-                    webClientBuilder
-                        .build()
-                        .head()
-                        .uri(it)
-                        .retrieve()
-                        .toBodilessEntity()
-                        .doOnError { e -> logger.error { "Error requesting filename info for track ${track.url()}, reason: ${e.message}" } }
-                }.map { it.headers.contentDisposition.filename }
-
-        return Mono.zip(url, filename)
-         */
+        }.doOnError { e ->
+            logger.debug(e) { "Error downloading ${track.url()}" }
+            logger.error { "Error downloading ${track.url()}" }
+        }
     }
 
     private fun <T> runBlocking(block: () -> T): Mono<T> =

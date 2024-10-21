@@ -16,7 +16,7 @@ abstract class UrlResolver(
 ) : AppearsInFile {
     override fun resolveTracks(id: String): Flux<Track> =
         getTracks(id, null)
-            .expand { if (it.nextOffset == null) empty() else getTracks(id, it.nextOffset) }
+            .expand { if (it.nextOffset == null || it.nextOffset == 0) empty() else getTracks(id, it.nextOffset) }
             .flatMapIterable(TrackListResponse::trackList)
             .distinct()
             .map(TrackList::id)
