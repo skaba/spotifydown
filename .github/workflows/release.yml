@@ -30,7 +30,7 @@ jobs:
       - name: create RPM package
         run: make-springboot-rpm .
       - name: create jar package
-        run: mvn --batch-mode --update-snapshots verify
+        run: mvn --batch-mode --update-snapshots package
       - name: Extract RPM file name
         run: echo "RPM_FILE=$(find . -type f -name "spotifydown*.rpm")" >> $GITHUB_ENV
       - name: Extract DEB file name
