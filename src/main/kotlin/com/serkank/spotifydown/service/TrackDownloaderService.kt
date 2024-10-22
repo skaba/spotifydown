@@ -31,8 +31,8 @@ class TrackDownloaderService {
             .flatMap { track ->
                 download(track, dryRun, session)
                     .onErrorResume { e ->
-                        logger.debug(e) { "Error downloading track ${track.url()}, reason: ${e.message}" }
-                        logger.error { "Error downloading track ${track.url()}, reason: ${e.message}" }
+                        logger.debug(e) { "Error downloading track ${track.url}, reason: ${e.message}" }
+                        logger.error { "Error downloading track ${track.url}, reason: ${e.message}" }
                         logMissing(track)
                     }
             }.count()
@@ -111,8 +111,8 @@ class TrackDownloaderService {
                 .getMetadata4Track(trackId)
                 .let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
         }.doOnError { e ->
-            logger.debug(e) { "Error downloading ${track.url()}" }
-            logger.error { "Error downloading ${track.url()}" }
+            logger.debug(e) { "Error downloading ${track.url}" }
+            logger.error { "Error downloading ${track.url}" }
         }
     }
 

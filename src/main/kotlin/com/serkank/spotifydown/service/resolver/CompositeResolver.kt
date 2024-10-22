@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux
 class CompositeResolver(
     resolvers: List<AppearsInFile>,
 ) {
-    private final val resolvers: Map<Type, AppearsInFile> = resolvers.associateBy(AppearsInFile::getType)
+    private final val resolvers: Map<Type, AppearsInFile> = resolvers.associateBy(AppearsInFile::type)
 
     fun resolveTracks(url: Url): Flux<Track> = resolvers[url.type]!!.resolveTracks(url.id)
 }

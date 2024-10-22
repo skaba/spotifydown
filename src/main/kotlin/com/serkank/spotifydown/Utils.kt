@@ -22,7 +22,7 @@ val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
-fun logMissing(track: Track): Mono<Track> = runBlocking { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.then(empty())
+fun logMissing(track: Track): Mono<Track> = runBlocking { MISSING_FILE.appendText(track.url + System.lineSeparator()) }.then(empty())
 
 fun Flux<Url>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this

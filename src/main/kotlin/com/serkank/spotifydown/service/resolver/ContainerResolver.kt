@@ -21,10 +21,10 @@ abstract class ContainerResolver(
             .distinct()
             .map(TrackList::id)
             .map(::Track)
-            .doOnError { e -> logger.error { "Error resolving tracks of ${getType()} #$id, reason: ${e.message}" } }
+            .doOnError { e -> logger.error { "Error resolving tracks of $type #$id, reason: ${e.message}" } }
 
     private fun getTracks(
         id: String,
         offset: Int?,
-    ): Mono<TrackListResponse> = spotifyDownService.getTracks(getType().toString(), id, offset)
+    ): Mono<TrackListResponse> = spotifyDownService.getTracks(type.toString(), id, offset)
 }
