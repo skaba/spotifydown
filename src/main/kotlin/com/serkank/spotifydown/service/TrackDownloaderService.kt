@@ -2,6 +2,7 @@ package com.serkank.spotifydown.service
 
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
+import com.serkank.spotifydown.runBlocking
 import com.spotify.metadata.Metadata
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.io.IOUtils
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
-import reactor.core.scheduler.Schedulers.boundedElastic
 import vavi.sound.sampled.mp3.MpegAudioFileWriter
 import xyz.gianlu.librespot.core.Session
 import xyz.gianlu.librespot.metadata.TrackId
@@ -115,11 +115,6 @@ class TrackDownloaderService {
             logger.error { "Error downloading ${track.url()}" }
         }
     }
-
-    private fun <T> runBlocking(block: () -> T): Mono<T> =
-        Mono
-            .fromSupplier(block)
-            .subscribeOn(boundedElastic())
 
     private fun session(): Session {
         // val credentialsFile =

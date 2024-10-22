@@ -1,6 +1,8 @@
 package com.serkank.spotifydown.model
 
-import com.serkank.spotifydown.model.Type.*
+import com.serkank.spotifydown.model.Type.ALBUM
+import com.serkank.spotifydown.model.Type.PLAYLIST
+import com.serkank.spotifydown.model.Type.TRACK
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

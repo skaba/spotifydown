@@ -10,6 +10,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
+import reactor.core.scheduler.Schedulers.boundedElastic
 import reactor.kotlin.core.publisher.toMono
 import java.io.File
 import java.nio.file.Path
@@ -21,15 +22,17 @@ val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
-fun logMissing(track: Track): Mono<Track> =
-    { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.toMono().then(
-        empty(),
-    )
+fun logMissing(track: Track): Mono<Track> = runBlocking { MISSING_FILE.appendText(track.url() + System.lineSeparator()) }.then(empty())
 
 fun Flux<Url>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this
         .flatMap { compositeResolver.resolveTracks(it) }
         .distinct()
+
+fun <T> runBlocking(block: () -> T): Mono<T> =
+    block
+        .toMono()
+        .subscribeOn(boundedElastic())
 
 fun Flux<String>.writeToFile(path: Path): Mono<Void> {
     val bufferFactory = DefaultDataBufferFactory()
