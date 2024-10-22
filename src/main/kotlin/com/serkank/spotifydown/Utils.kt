@@ -24,9 +24,9 @@ private val MISSING_FILE = File("missing.txt")
 
 fun logMissing(track: Track): Mono<Track> = runBlocking { MISSING_FILE.appendText(track.url + System.lineSeparator()) }.then(empty())
 
-fun Flux<Url>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
+fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this
-        .flatMap { compositeResolver.resolveTracks(it) }
+        .flatMap { compositeResolver.resolveTracks(Url(it)) }
         .distinct()
 
 fun <T> runBlocking(block: () -> T): Mono<T> =

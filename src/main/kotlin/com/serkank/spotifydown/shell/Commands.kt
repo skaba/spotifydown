@@ -2,7 +2,6 @@ package com.serkank.spotifydown.shell
 
 import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.model.Track
-import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
@@ -37,7 +36,6 @@ class Commands(
         val tracks =
             Flux
                 .fromIterable(urls)
-                .map(Url.Companion::invoke)
                 .mapToTracks(compositeResolver)
         val count =
             trackDownloaderService
@@ -58,7 +56,6 @@ class Commands(
         val file = Path.of(filename)
         Flux
             .fromIterable(urls)
-            .map(Url.Companion::invoke)
             .mapToTracks(compositeResolver)
             .map(Track::url)
             .writeToFile(file)
