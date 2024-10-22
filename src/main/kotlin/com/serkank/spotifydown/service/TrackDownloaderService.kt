@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.io.IOUtils
 import org.springframework.stereotype.Service
 import vavi.sound.sampled.mp3.MpegAudioFileWriter
 import xyz.gianlu.librespot.core.Session
@@ -45,12 +46,12 @@ class TrackDownloaderService {
         session: Session,
     ): Boolean {
         val filename = getFilename(track, session) ?: return false
-        val path = File(filename)
-        if (path.exists()) {
-            logger.info { "$path already downloaded, skipping" }
+        val file = File(filename)
+        if (file.exists()) {
+            logger.info { "$file already downloaded, skipping" }
             return false
         }
-        logger.info { "Downloading track $path" }
+        logger.info { "Downloading track $file" }
         if (dryRun) {
             return false
         }
@@ -66,6 +67,7 @@ class TrackDownloaderService {
                     ).`in`
                     .stream()
             val ogg = AudioSystem.getAudioInputStream(input)
+            val output = file.outputStream()
             val pcmFormat = AudioFormat(44100f, 16, ogg.format.channels, true, false)
             val mp3AudioFormat =
                 AudioFormat(
@@ -80,10 +82,12 @@ class TrackDownloaderService {
                 )
             val pcmInputStream = AudioSystem.getAudioInputStream(pcmFormat, ogg)
             val mp3InputStream = AudioSystem.getAudioInputStream(mp3AudioFormat, pcmInputStream)
-            AudioSystem.write(mp3InputStream, MpegAudioFileWriter.MP3, path)
+            AudioSystem.write(mp3InputStream, MpegAudioFileWriter.MP3, output)
+            IOUtils.closeQuietly(output, mp3InputStream, pcmInputStream, input)
             logger.info { "Downloaded $filename" }
             return true
         } catch (e: Exception) {
+            logger.debug(e) { "Error downloading ${track.url}" }
             logger.error { "Error downloading $filename" }
             logMissing(track)
             return false
@@ -101,6 +105,7 @@ class TrackDownloaderService {
                 .getMetadata4Track(trackId)
                 .let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
         } catch (e: Exception) {
+            logger.debug(e) { "Error downloading ${track.url}" }
             logger.error { "Error downloading ${track.url}" }
             logMissing(track)
             return null
