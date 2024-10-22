@@ -7,12 +7,11 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import reactor.core.publisher.Mono.just
-import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 abstract class ContainerResolverTest<T : ContainerResolver>(
-    private val clazz: KClass<T>,
+    private val constructor: (SpotifyDownService) -> T,
 ) {
     private val id: String = "ID"
 
@@ -33,7 +32,7 @@ abstract class ContainerResolverTest<T : ContainerResolver>(
                 on { getTracks(type, id, null) } doReturn just(returnValue1)
                 on { getTracks(type, id, 101) } doReturn just(returnValue2)
             }
-        val containerResolver = clazz.constructors.first().call(spotifyDownService)
+        val containerResolver = constructor.invoke(spotifyDownService)
         return containerResolver to spotifyDownService
     }
 
