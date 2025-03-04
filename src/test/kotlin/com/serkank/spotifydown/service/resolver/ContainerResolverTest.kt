@@ -8,9 +8,9 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verifySequence
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.core.publisher.Mono.just
+import reactor.test.StepVerifier
 import kotlin.test.Test
 
 @ExtendWith(MockKExtension::class)
@@ -43,31 +43,31 @@ abstract class ContainerResolverTest<T : ContainerResolver> {
     @Test
     fun testResolveTracksWithNullOffset() {
         prepareMocks(null)
-        val tracks =
-            containerResolver
-                .resolveTracks(id)
-                .collectList()
-                .block()
+
+        StepVerifier
+            .create(containerResolver.resolveTracks(id))
+            .expectNextCount(150)
+            .verifyComplete()
+
         verifySequence {
             spotifyDownService.getTracks(type, id, null)
             spotifyDownService.getTracks(type, id, 101)
         }
-        assertThat(tracks).hasSize(150)
     }
 
     @Test
     fun testResolveTracksWithZeroOffset() {
         prepareMocks(0)
-        val tracks =
-            containerResolver
-                .resolveTracks(id)
-                .collectList()
-                .block()
+
+        StepVerifier
+            .create(containerResolver.resolveTracks(id))
+            .expectNextCount(150)
+            .verifyComplete()
+
         verifySequence {
             spotifyDownService.getTracks(type, id, null)
             spotifyDownService.getTracks(type, id, 101)
         }
-        assertThat(tracks).hasSize(150)
     }
 
     abstract val type: String
