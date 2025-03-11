@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size
 import org.springframework.shell.command.CommandRegistration
 import org.springframework.shell.command.annotation.Command
 import org.springframework.shell.command.annotation.Option
-import reactor.core.publisher.Flux
+import reactor.kotlin.core.publisher.toFlux
 import java.io.File
 import java.nio.file.Path
 
@@ -34,8 +34,8 @@ class Commands(
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
-            Flux
-                .fromIterable(urls)
+            urls
+                .toFlux()
                 .mapToTracks(compositeResolver)
         val count =
             trackDownloaderService
@@ -54,8 +54,8 @@ class Commands(
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = Path.of(filename)
-        Flux
-            .fromIterable(urls)
+        urls
+            .toFlux()
             .mapToTracks(compositeResolver)
             .map(Track::url)
             .writeToFile(file)

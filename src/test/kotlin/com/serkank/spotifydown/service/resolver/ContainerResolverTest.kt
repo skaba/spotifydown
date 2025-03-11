@@ -9,8 +9,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verifySequence
 import org.junit.jupiter.api.extension.ExtendWith
-import reactor.core.publisher.Mono.just
-import reactor.test.StepVerifier
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 import kotlin.test.Test
 
 @ExtendWith(MockKExtension::class)
@@ -36,16 +36,17 @@ abstract class ContainerResolverTest<T : ContainerResolver> {
         every { returnValue2.nextOffset } returns noNextOffset
         every { returnValue2.trackList } returns (100..150).map(Int::toString).map(::TrackList)
 
-        every { spotifyDownService.getTracks(type, id, null) } returns just(returnValue1)
-        every { spotifyDownService.getTracks(type, id, 101) } returns just(returnValue2)
+        every { spotifyDownService.getTracks(type, id, null) } returns returnValue1.toMono()
+        every { spotifyDownService.getTracks(type, id, 101) } returns returnValue2.toMono()
     }
 
     @Test
     fun testResolveTracksWithNullOffset() {
         prepareMocks(null)
 
-        StepVerifier
-            .create(containerResolver.resolveTracks(id))
+        containerResolver
+            .resolveTracks(id)
+            .test()
             .expectNextCount(150)
             .verifyComplete()
 
@@ -59,8 +60,9 @@ abstract class ContainerResolverTest<T : ContainerResolver> {
     fun testResolveTracksWithZeroOffset() {
         prepareMocks(0)
 
-        StepVerifier
-            .create(containerResolver.resolveTracks(id))
+        containerResolver
+            .resolveTracks(id)
+            .test()
             .expectNextCount(150)
             .verifyComplete()
 

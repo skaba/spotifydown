@@ -49,3 +49,5 @@ fun Flux<String>.writeToFile(path: Path): Mono<Void> {
         WRITE,
     )
 }
+
+fun <T : Any> T.toFlux(): Flux<T> = Flux.just(this)
