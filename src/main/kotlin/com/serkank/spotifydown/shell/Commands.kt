@@ -1,7 +1,6 @@
 package com.serkank.spotifydown.shell
 
 import com.serkank.spotifydown.mapToTracks
-import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.serkank.spotifydown.service.resolver.FileResolver
@@ -57,7 +56,7 @@ class Commands(
         urls
             .toFlux()
             .mapToTracks(compositeResolver)
-            .map(Track::url)
+            .map { it.url }
             .writeToFile(file)
             .block()
     }

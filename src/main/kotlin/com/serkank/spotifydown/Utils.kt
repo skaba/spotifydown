@@ -3,6 +3,8 @@ package com.serkank.spotifydown
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.resolver.CompositeResolver
+import com.spotify.metadata.Metadata
+import com.spotify.playlist4.Playlist4ApiProto
 import org.springframework.core.ResolvableType
 import org.springframework.core.codec.CharSequenceEncoder
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -12,6 +14,8 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.empty
 import reactor.core.scheduler.Schedulers.boundedElastic
 import reactor.kotlin.core.publisher.toMono
+import xyz.gianlu.librespot.common.Utils.bytesToHex
+import xyz.gianlu.librespot.metadata.TrackId
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.CREATE_NEW
@@ -19,10 +23,12 @@ import java.nio.file.StandardOpenOption.WRITE
 
 const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|playlist|album)\/([^\s?]+)(\?.*)?"""
 val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
-const val HEADER = "https://spotifydown.com"
 private val MISSING_FILE = File("missing.txt")
 
-fun logMissing(track: Track): Mono<Track> = runBlocking { MISSING_FILE.appendText(track.url + System.lineSeparator()) }.then(empty())
+fun logMissing(track: Track): Mono<Track> =
+    runBlocking {
+        MISSING_FILE.appendText(track.url + System.lineSeparator())
+    }.then(empty())
 
 fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> =
     this
@@ -49,5 +55,10 @@ fun Flux<String>.writeToFile(path: Path): Mono<Void> {
         WRITE,
     )
 }
+
+val Metadata.Track.uri: String get() = TrackId.fromHex(bytesToHex(this.gid.toByteArray())).toSpotifyUri()
+
+val Metadata.Track.id get() = this.uri.split(':').last()
+val Playlist4ApiProto.Item.id get() = this.uri.split(':').last()
 
 fun <T : Any> T.toFlux(): Flux<T> = Flux.just(this)

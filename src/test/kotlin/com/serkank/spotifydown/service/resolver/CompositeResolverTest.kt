@@ -1,5 +1,6 @@
 package com.serkank.spotifydown.service.resolver
 
+import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.SpykBean
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Type.ALBUM
@@ -11,6 +12,7 @@ import io.mockk.every
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import reactor.core.publisher.Flux.empty
+import xyz.gianlu.librespot.core.Session
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
@@ -19,6 +21,9 @@ import kotlin.test.assertSame
 class CompositeResolverTest {
     val id: String = "ID"
     val returnValue = empty<Track>()
+
+    @MockkBean
+    lateinit var session: Session
 
     @SpykBean
     lateinit var playlistResolver: PlaylistResolver

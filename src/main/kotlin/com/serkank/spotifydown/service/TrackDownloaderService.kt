@@ -20,12 +20,13 @@ import javax.sound.sampled.AudioSystem
 private val logger = KotlinLogging.logger {}
 
 @Service
-class TrackDownloaderService {
+class TrackDownloaderService(
+    private val session: Session,
+) {
     fun download(
         tracks: Flux<Track>,
         dryRun: Boolean,
     ): Mono<Long> {
-        val session = session()
         logger.info { "Downloading tracks" }
         return tracks
             .flatMap { track ->
@@ -48,7 +49,7 @@ class TrackDownloaderService {
             return empty()
         }
 
-        return getFilename(track, session)
+        return getFilename(track)
             .flatMap { filename ->
                 val file = File(filename)
                 if (file.exists()) {
@@ -99,10 +100,7 @@ class TrackDownloaderService {
             }
     }
 
-    private fun getFilename(
-        track: Track,
-        session: Session,
-    ): Mono<String> {
+    private fun getFilename(track: Track): Mono<String> {
         val trackId = TrackId.fromBase62(track.id)
 
         return runBlocking {
