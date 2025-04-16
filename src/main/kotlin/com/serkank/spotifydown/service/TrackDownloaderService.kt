@@ -5,6 +5,7 @@ import com.serkank.spotifydown.model.Track
 import com.spotify.metadata.Metadata
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -20,32 +21,31 @@ import javax.sound.sampled.AudioSystem
 private val logger = KotlinLogging.logger {}
 
 @Service
-class TrackDownloaderService {
+class TrackDownloaderService(
+    private val session: Session,
+) {
     fun download(
         tracks: Sequence<Track>,
         dryRun: Boolean,
     ): Int {
         logger.info { "Downloading tracks" }
-        session().use { session ->
-            return runBlocking(Dispatchers.IO) {
-                tracks
-                    .map {
-                        async {
-                            download(it, dryRun, session)
-                        }
-                    }.toList()
-                    .awaitAll()
-                    .count { it }
-            }
+        return runBlocking(Dispatchers.IO) {
+            tracks
+                .map {
+                    async {
+                        download(it, dryRun)
+                    }
+                }.toList()
+                .awaitAll()
+                .count { it }
         }
     }
 
     private fun download(
         track: Track,
         dryRun: Boolean,
-        session: Session,
     ): Boolean {
-        val filename = getFilename(track, session) ?: return false
+        val filename = getFilename(track) ?: return false
         val file = File(filename)
         if (file.exists()) {
             logger.info { "$file already downloaded, skipping" }
@@ -94,10 +94,7 @@ class TrackDownloaderService {
         }
     }
 
-    private fun getFilename(
-        track: Track,
-        session: Session,
-    ): String? {
+    private fun getFilename(track: Track): String? {
         val trackId = TrackId.fromBase62(track.id)
         try {
             return session
@@ -110,33 +107,5 @@ class TrackDownloaderService {
             logMissing(track)
             return null
         }
-    }
-
-    private fun session(): Session {
-        // val credentialsFile =
-        // credentialsFile.createNewFile()
-        val conf =
-            Session.Configuration
-                .Builder()
-                .setStoreCredentials(true)
-                .setStoredCredentialsFile(File(System.getProperty("user.home"), ".spotify_down"))
-                .setCacheEnabled(false)
-                /*.setStoreCredentials(true)
-                .setStoredCredentialsFile()
-                .setTimeSynchronizationMethod()
-                .setTimeManualCorrection()
-                .setProxyEnabled()
-                .setProxyType()
-                .setProxyAddress()
-                .setProxyPort()
-                .setProxyAuth()
-                .setProxyUsername()
-                .setProxyPassword()
-                .setRetryOnChunkError()                 */
-                .build()
-        return Session
-            .Builder(conf)
-            .oauth()
-            .create()
     }
 }
