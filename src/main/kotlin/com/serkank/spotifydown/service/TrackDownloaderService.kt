@@ -29,14 +29,15 @@ class TrackDownloaderService(
     ): Mono<Long> {
         logger.info { "Downloading tracks" }
         return tracks
-            .flatMap { track ->
+            .flatMap({ track ->
                 download(track, dryRun, session)
                     .onErrorResume { e ->
                         logger.debug(e) { "Error downloading track ${track.url}, reason: ${e.message}" }
                         logger.error { "Error downloading track ${track.url}, reason: ${e.message}" }
                         logMissing(track)
                     }
-            }.count()
+            }, 5)
+            .count()
             .doFinally { session.close() }
     }
 
@@ -44,21 +45,17 @@ class TrackDownloaderService(
         track: Track,
         dryRun: Boolean,
         session: Session,
-    ): Mono<Track> {
-        if (dryRun) {
-            return empty()
-        }
-
-        return getFilename(track)
+    ): Mono<Track> =
+        getFilename(track)
             .flatMap { filename ->
                 val file = File(filename)
                 if (file.exists()) {
                     logger.info { "$file already downloaded, skipping" }
-                    empty<Track>()
+                    return@flatMap empty<Track>()
                 }
                 logger.info { "Downloading track $file" }
                 if (dryRun) {
-                    empty<Track>()
+                    return@flatMap empty<Track>()
                 }
 
                 runBlocking {
@@ -95,10 +92,9 @@ class TrackDownloaderService(
                     .onErrorResume { e ->
                         logger.debug(e) { "Error downloading $file, reason: ${e.message}" }
                         logger.error { "Error downloading $file, reason: ${e.message}" }
-                        logMissing(track)
+                        return@onErrorResume logMissing(track)
                     }
             }
-    }
 
     private fun getFilename(track: Track): Mono<String> {
         val trackId = TrackId.fromBase62(track.id)
@@ -107,7 +103,7 @@ class TrackDownloaderService(
             session
                 .api()
                 .getMetadata4Track(trackId)
-                .let { "${it.artistList.joinToString { it.name }} - ${it.name}.mp3" }
+                .let { "${it.artistList.joinToString { it.name }} - ${it.name.replace('/','-')}.mp3" }
         }.doOnError { e ->
             logger.debug(e) { "Error downloading ${track.url}" }
             logger.error { "Error downloading ${track.url}" }
