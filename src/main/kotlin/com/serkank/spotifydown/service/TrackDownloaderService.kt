@@ -1,5 +1,6 @@
 package com.serkank.spotifydown.service
 
+import com.serkank.spotifydown.filename
 import com.serkank.spotifydown.logMissing
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.runBlocking
@@ -103,7 +104,7 @@ class TrackDownloaderService(
             session
                 .api()
                 .getMetadata4Track(trackId)
-                .let { "${it.artistList.joinToString { it.name }} - ${it.name.replace('/','-')}.mp3" }
+                .let { it.filename }
         }.doOnError { e ->
             logger.debug(e) { "Error downloading ${track.url}" }
             logger.error { "Error downloading ${track.url}" }
