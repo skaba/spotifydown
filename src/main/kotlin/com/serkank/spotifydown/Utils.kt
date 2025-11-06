@@ -10,6 +10,7 @@ import java.io.File
 
 const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|playlist|album)\/([^\s?]+)(\?.*)?"""
 val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
+val INVALID_FILENAME_CHARS = "[<>:\"/\\|?*]".toRegex()
 private val MISSING_FILE = File("missing.txt")
 
 fun logMissing(track: Track) {
@@ -30,6 +31,12 @@ fun appendTrackUrl(
 
 val Metadata.Track.uri: String
     get() = TrackId.fromHex(bytesToHex(this.gid.toByteArray())).toSpotifyUri()
+
+val Metadata.Track.filename: String get() =
+    "${this.artistList.joinToString { it.name }} - ${this.name}.mp3".replace(
+        INVALID_FILENAME_CHARS,
+        "-",
+)
 
 val Metadata.Track.id get() =
     this.uri
