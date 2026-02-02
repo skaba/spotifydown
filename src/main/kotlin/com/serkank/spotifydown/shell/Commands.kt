@@ -8,14 +8,14 @@ import com.serkank.spotifydown.service.resolver.FileResolver
 import com.serkank.spotifydown.validator.ValidSpotifyUrl
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Size
-import org.springframework.shell.command.CommandRegistration
-import org.springframework.shell.command.annotation.Command
-import org.springframework.shell.command.annotation.Option
+import org.springframework.shell.core.command.annotation.Command
+import org.springframework.shell.core.command.annotation.Option
+import org.springframework.stereotype.Component
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
-@Command
+@Component
 class Commands(
     private val compositeResolver: CompositeResolver,
     private val fileResolver: FileResolver,
@@ -23,11 +23,11 @@ class Commands(
 ) {
     @Command
     fun download(
-        @Option(longNames = ["url"], shortNames = ['u'], arity = CommandRegistration.OptionArity.ONE_OR_MORE)
+        @Option(longName = "url", shortName = 'u')
         @Size(min = 1)
         @ValidSpotifyUrl
         urls: List<String>,
-        @Option(longNames = ["dry-run"], shortNames = ['d']) dryRun: Boolean = false,
+        @Option(longName = "dry-run", shortName = 'd') dryRun: Boolean = false,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
@@ -42,11 +42,11 @@ class Commands(
 
     @Command
     fun dump(
-        @Option(longNames = ["url"], shortNames = ['u'], arity = CommandRegistration.OptionArity.ONE_OR_MORE)
+        @Option(longName = "url", shortName = 'u')
         @Size(min = 1)
         @ValidSpotifyUrl
         urls: List<String>,
-        @Option(longNames = ["file"], shortNames = ['f']) filename: String,
+        @Option(longName = "file", shortName = 'f') filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = File(filename)
@@ -58,8 +58,8 @@ class Commands(
 
     @Command
     fun downloadFile(
-        @Option(longNames = ["file"], shortNames = ['f']) filename: String,
-        @Option(longNames = ["delete-after"]) deleteAfter: Boolean = false,
+        @Option(longName = "file", shortName = 'f') filename: String,
+        @Option(longName = "delete-after") deleteAfter: Boolean = false,
     ) {
         logger.info { "Downloading from $filename" }
         val tracks = fileResolver.resolveTracks(filename)
