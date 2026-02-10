@@ -2,12 +2,10 @@ package com.serkank.spotifydown
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.shell.command.annotation.CommandScan
 import xyz.gianlu.librespot.core.Session
 import java.io.File
 
 @Configuration
-@CommandScan
 class Config {
     @Bean(destroyMethod = "close")
     fun session(): Session {

@@ -36,7 +36,7 @@ fun Flux<String>.mapToTracks(compositeResolver: CompositeResolver): Flux<Track> 
         .flatMap { compositeResolver.resolveTracks(Url(it)) }
         .distinct()
 
-fun <T> runBlocking(block: () -> T): Mono<T> =
+fun <T : Any> runBlocking(block: () -> T): Mono<T> =
     block
         .toMono()
         .subscribeOn(boundedElastic())
