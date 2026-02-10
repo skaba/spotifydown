@@ -7,6 +7,9 @@ import com.serkank.spotifydown.runBlocking
 import com.spotify.metadata.Metadata
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.io.IOUtils
+import org.jaudiotagger.audio.mp3.MP3File
+import org.jaudiotagger.tag.FieldKey
+import org.jaudiotagger.tag.id3.ID3v24Tag
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -47,16 +50,17 @@ class TrackDownloaderService(
         dryRun: Boolean,
         session: Session,
     ): Mono<Track> =
-        getFilename(track)
-            .flatMap { filename ->
+        getMetadata(track)
+            .flatMap { metadata ->
+                val filename = metadata.filename
                 val file = File(filename)
                 if (file.exists()) {
                     logger.info { "$file already downloaded, skipping" }
-                    return@flatMap empty<Track>()
+                    return@flatMap empty()
                 }
                 logger.info { "Downloading track $file" }
                 if (dryRun) {
-                    return@flatMap empty<Track>()
+                    return@flatMap empty()
                 }
 
                 runBlocking {
@@ -88,54 +92,39 @@ class TrackDownloaderService(
                     val mp3InputStream = AudioSystem.getAudioInputStream(mp3AudioFormat, pcmInputStream)
                     AudioSystem.write(mp3InputStream, MpegAudioFileWriter.MP3, output)
                     IOUtils.closeQuietly(output, mp3InputStream, pcmInputStream, input)
+                    tagFile(file, metadata)
                     logger.info { "Downloaded $filename" }
                 }.map { track }
                     .onErrorResume { e ->
-                        logger.debug(e) { "Error downloading $file, reason: ${e.message}" }
-                        logger.error { "Error downloading $file, reason: ${e.message}" }
+                        logger.debug(e) { "Error downloading $file" }
+                        logger.error { "Error downloading $file: ${e.message}" }
                         return@onErrorResume logMissing(track)
                     }
             }
 
-    private fun getFilename(track: Track): Mono<String> {
-        val trackId = TrackId.fromBase62(track.id)
+    private fun tagFile(
+        mp3: File,
+        metadata: Metadata.Track,
+    ) {
+        val mP3File = MP3File(mp3)
+        val tag = ID3v24Tag()
+        tag.setField(FieldKey.ARTIST, metadata.artistList[0].name)
+        tag.setField(FieldKey.ALBUM_ARTISTS, *metadata.artistList.map { it.name }.toTypedArray())
+        tag.setField(FieldKey.TITLE, metadata.name)
+        tag.setField(FieldKey.ALBUM, metadata.album.name)
+        mP3File.iD3v2Tag = tag
+        mP3File.save()
+    }
 
+    private fun getMetadata(track: Track): Mono<Metadata.Track> {
+        val trackId = TrackId.fromBase62(track.id)
         return runBlocking {
             session
                 .api()
                 .getMetadata4Track(trackId)
-                .let { it.filename }
         }.doOnError { e ->
-            logger.debug(e) { "Error downloading ${track.url}" }
-            logger.error { "Error downloading ${track.url}" }
+            logger.debug(e) { "Error getting metadata for ${track.url}" }
+            logger.error { "Error getting metadata for ${track.url}: ${e.message}" }
         }
-    }
-
-    private fun session(): Session {
-        // val credentialsFile =
-        // credentialsFile.createNewFile()
-        val conf =
-            Session.Configuration
-                .Builder()
-                .setStoreCredentials(true)
-                .setStoredCredentialsFile(File(System.getProperty("user.home"), ".spotify_down"))
-                .setCacheEnabled(false)
-                /*.setStoreCredentials(true)
-                .setStoredCredentialsFile()
-                .setTimeSynchronizationMethod()
-                .setTimeManualCorrection()
-                .setProxyEnabled()
-                .setProxyType()
-                .setProxyAddress()
-                .setProxyPort()
-                .setProxyAuth()
-                .setProxyUsername()
-                .setProxyPassword()
-                .setRetryOnChunkError()                 */
-                .build()
-        return Session
-            .Builder(conf)
-            .oauth()
-            .create()
     }
 }

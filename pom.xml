@@ -92,6 +92,11 @@
             <version>2.21.0</version>
         </dependency>
         <dependency>
+            <groupId>net.jthink</groupId>
+            <artifactId>jaudiotagger</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.ninja-squad</groupId>
             <artifactId>springmockk</artifactId>
             <version>4.0.2</version>
