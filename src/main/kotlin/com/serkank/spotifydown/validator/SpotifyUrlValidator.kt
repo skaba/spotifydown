@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
-import org.springframework.http.client.ReactorNettyClientRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
@@ -39,81 +38,77 @@ private const val INVALID_SPOTIFY_URL = "Not a valid Spotify URL"
 @Component
 class SpotifyUrlValidator(
     restClientBuilder: RestClient.Builder,
-) : ConstraintValidator<ValidSpotifyUrl, List<String>> {
+) : ConstraintValidator<ValidSpotifyUrl, String> {
     private val restClient =
         restClientBuilder
-            .requestFactory(ReactorNettyClientRequestFactory())
             .defaultStatusHandler(
                 { _: HttpStatusCode? -> true },
                 { _: HttpRequest?, _: ClientHttpResponse? -> },
             ).build()
 
     override fun isValid(
-        value: List<String>,
+        value: String,
         context: ConstraintValidatorContext,
     ): Boolean {
-        var valid = true
         context.disableDefaultConstraintViolation()
-        for (url in value) {
-            if (!url.matches(SPOTIFY_URL_REGEX)) {
+        if (!value.matches(SPOTIFY_URL_REGEX)) {
+            context.buildConstraintViolationWithTemplate(INVALID_SPOTIFY_URL).addConstraintViolation()
+            return false
+        }
+        val entity =
+            restClient
+                .head()
+                .uri(value)
+                .retrieve()
+                .toBodilessEntity()
+
+        val status =
+            HttpStatus.valueOf(
+                entity
+                    .statusCode
+                    .value(),
+            )
+        when (status) {
+            OK -> {
+                return true
+                // Valid do nothing
+            }
+
+            BAD_REQUEST -> {
                 context.buildConstraintViolationWithTemplate(INVALID_SPOTIFY_URL).addConstraintViolation()
                 return false
             }
-            val entity =
-                restClient
-                    .head()
-                    .uri(url)
-                    .retrieve()
-                    .toBodilessEntity()
 
-            val status =
-                HttpStatus.valueOf(
-                    entity
-                        .statusCode
-                        .value(),
-                )
-            when (status) {
-                OK -> {
-                    // Valid do nothing
-                }
+            NOT_FOUND -> {
+                context.buildConstraintViolationWithTemplate("$value not found").addConstraintViolation()
+                return false
+            }
 
-                BAD_REQUEST -> {
-                    context.buildConstraintViolationWithTemplate(INVALID_SPOTIFY_URL).addConstraintViolation()
-                    valid = false
-                }
-
-                NOT_FOUND -> {
-                    context.buildConstraintViolationWithTemplate("$url not found").addConstraintViolation()
-                    valid = false
-                }
-
-                FOUND -> {
-                    val expectedLocation = "https://accounts.spotify.com/login?continue=${URLEncoder.encode(url)}"
-                    if (entity.headers.getFirst(LOCATION) != null &&
-                        entity.headers
-                            .getFirst(LOCATION)!!
-                            .startsWith(expectedLocation)
-                    ) {
-                        context
-                            .buildConstraintViolationWithTemplate("$url not accessible, private playlist?")
-                            .addConstraintViolation()
-                    } else {
-                        context
-                            .buildConstraintViolationWithTemplate("Error validating $url ($status)")
-                            .addConstraintViolation()
-                    }
-                    valid = false
-                }
-
-                else -> {
+            FOUND -> {
+                val expectedLocation =
+                    "https://accounts.spotify.com/login?continue=${URLEncoder.encode(value, Charsets.UTF_8)}"
+                if (entity.headers.getFirst(LOCATION) != null &&
+                    entity.headers
+                        .getFirst(LOCATION)!!
+                        .startsWith(expectedLocation)
+                ) {
                     context
-                        .buildConstraintViolationWithTemplate("Error validating $url ($status)")
+                        .buildConstraintViolationWithTemplate("$value not accessible, private playlist?")
                         .addConstraintViolation()
-                    valid = false
+                } else {
+                    context
+                        .buildConstraintViolationWithTemplate("Error validating $value ($status)")
+                        .addConstraintViolation()
                 }
+                return false
+            }
+
+            else -> {
+                context
+                    .buildConstraintViolationWithTemplate("Error validating $value ($status)")
+                    .addConstraintViolation()
+                return false
             }
         }
-
-        return valid
     }
 }

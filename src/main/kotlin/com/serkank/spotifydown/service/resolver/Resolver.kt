@@ -5,7 +5,7 @@ import com.serkank.spotifydown.model.Type
 import reactor.core.publisher.Flux
 
 interface Resolver {
-    fun getType(): Type
+    val type: Type
 
     fun resolveTracks(id: String): Flux<Track>
 }

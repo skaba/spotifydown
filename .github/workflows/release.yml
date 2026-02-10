@@ -19,12 +19,15 @@ jobs:
         run: wget https://github.com/hdsdi3g/linux-springboot-packager/releases/download/0.8.0/linux-springboot-packager-0.8.0.deb
       - name: Install linux-springboot-packager
         run: sudo dpkg -i linux-springboot-packager-0.8.0.deb
-      - name: Install JDK 21
+      - name: Install JDK 25
         uses: actions/setup-java@v3
         with:
-          java-version: 21
+          java-version: 25
           distribution: 'temurin'
           cache: 'maven'
+      - name: Build Librespot snapshot
+        working-directory: ./librespot-java
+        run: mvn --batch-mode --update-snapshots -Dmaven.test.failure.ignore=true -DskipTests clean install
       - name: create Deb package
         run : make-springboot-deb .
       - name: create RPM package
