@@ -5,7 +5,7 @@ spotifydown
 spotifydown - Download Spotify tracks as MP3
 
 # SYNOPSIS
-spotifydown *&lt;download|download-file&gt;* &lt;url|file&gt;
+spotifydown *&lt;download&gt;* --url &lt;url&gt;
 
 # DESCRIPTION
 Download Spotify tracks as MP3
