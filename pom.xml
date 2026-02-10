@@ -82,9 +82,9 @@
             <version>1.9.17</version>
         </dependency>
         <dependency>
-            <groupId>com.tagtraum</groupId>
-            <artifactId>ffsampledsp-complete</artifactId>
-            <version>0.9.53</version>
+            <groupId>com.github.stephengold</groupId>
+            <artifactId>j-ogg-vorbis</artifactId>
+            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
