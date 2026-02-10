@@ -34,6 +34,9 @@ class CompositeResolverTest {
     @SpykBean
     lateinit var trackResolver: TrackResolver
 
+    @SpykBean
+    lateinit var fileResolver: FileResolver
+
     @Autowired
     lateinit var compositeResolver: CompositeResolver
 
@@ -57,6 +60,7 @@ class CompositeResolverTest {
 
     @Test
     fun testFileResolver() {
-        assertFailsWith<NullPointerException> { compositeResolver.resolveTracks(Url(FILE, id)) }
+        every { fileResolver.resolveTracks(any()) } returns returnValue
+        assertSame(returnValue, compositeResolver.resolveTracks(Url(FILE, id)))
     }
 }

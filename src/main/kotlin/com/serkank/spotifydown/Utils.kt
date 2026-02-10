@@ -22,6 +22,7 @@ import java.nio.file.StandardOpenOption.CREATE_NEW
 import java.nio.file.StandardOpenOption.WRITE
 
 const val SPOTIFY_URL_PATTERN = """https?:\/\/[^/]*open\.spotify\.com\/(track|playlist|album)\/([^\s?]+)(\?.*)?"""
+const val FILE_PREFIX = "file://"
 val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 val INVALID_FILENAME_CHARS = "[<>:\"/\\|?*]".toRegex()
 private val MISSING_FILE = File("missing.txt")

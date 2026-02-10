@@ -20,15 +20,14 @@ private val logger = KotlinLogging.logger {}
 @Component
 class Commands(
     private val compositeResolver: CompositeResolver,
-    private val fileResolver: FileResolver,
     private val trackDownloaderService: TrackDownloaderService,
 ) {
     @Command
     fun download(
-        @Option(longName = "url", shortName = 'u')
+        @Option(longName = "url", shortName = 'u', required = true)
         @Size(min = 1)
         urls: List<@ValidSpotifyUrl String>,
-        @Option(longName = "dry-run", shortName = 'd') dryRun: Boolean = false,
+        @Option(longName = "dry-run", shortName = 'd', defaultValue = "false") dryRun: Boolean,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
         val tracks =
@@ -44,10 +43,9 @@ class Commands(
 
     @Command
     fun dump(
-        @Option(longName = "url", shortName = 'u')
+        @Option(longName = "url", shortName = 'u', required = true)
         @Size(min = 1)
-        @ValidSpotifyUrl
-        urls: List<String>,
+        urls: List<@ValidSpotifyUrl String>,
         @Option(longName = "file", shortName = 'f') filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
@@ -58,22 +56,5 @@ class Commands(
             .map { it.url }
             .writeToFile(file)
             .block()
-    }
-
-    @Command
-    fun downloadFile(
-        @Option(longName = "file", shortName = 'f') filename: String,
-        @Option(longName = "delete-after") deleteAfter: Boolean = false,
-    ) {
-        logger.info { "Downloading from $filename" }
-        val tracks = fileResolver.resolveTracks(filename)
-        if (deleteAfter) {
-            File(filename).delete()
-        }
-        val count =
-            trackDownloaderService
-                .download(tracks, false)
-                .block()
-        logger.info { "Downloaded $count track(s)" }
     }
 }

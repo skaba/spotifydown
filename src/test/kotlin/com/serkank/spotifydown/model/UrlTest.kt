@@ -1,6 +1,7 @@
 package com.serkank.spotifydown.model
 
 import com.serkank.spotifydown.model.Type.ALBUM
+import com.serkank.spotifydown.model.Type.FILE
 import com.serkank.spotifydown.model.Type.PLAYLIST
 import com.serkank.spotifydown.model.Type.TRACK
 import kotlin.test.Test
@@ -32,5 +33,12 @@ class UrlTest {
         val (type, id) = Url("https://open.spotify.com/album/7LgrhuKnAXpNEv8qzcVd2t?si=pj4kZC1FSVa8-QCTiQP2hQ")
         assertEquals(ALBUM, type)
         assertEquals("7LgrhuKnAXpNEv8qzcVd2t", id)
+    }
+
+    @Test
+    fun testFromFileUrl() {
+        val (type, id) = Url("file://foo.txt")
+        assertEquals(FILE, type)
+        assertEquals("foo.txt", id)
     }
 }
