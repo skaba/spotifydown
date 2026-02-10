@@ -25,6 +25,9 @@ jobs:
           java-version: 25
           distribution: 'temurin'
           cache: 'maven'
+      - name: Build Librespot snapshot
+        working-directory: ./librespot-java
+        run: mvn --batch-mode --update-snapshots -Dmaven.test.failure.ignore=true -DskipTests clean install
       - name: create Deb package
         run : make-springboot-deb .
       - name: create RPM package
