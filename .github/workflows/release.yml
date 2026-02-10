@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
       - name: Install linux-springboot-packager dependencies
         run: sudo apt-get install -y --no-install-recommends man-db pandoc rpmlint rpm apt-utils xmlstarlet lintian wget
       - name: Download linux-springboot-packager
