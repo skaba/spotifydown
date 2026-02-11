@@ -10,7 +10,7 @@ import xyz.gianlu.librespot.metadata.AlbumId
 @Service
 class AlbumResolver(
     private val session: Session,
-) : AppearsInFile {
+) : Resolver {
     override val type = ALBUM
 
     override fun resolveTracks(id: String): Sequence<Track> =

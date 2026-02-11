@@ -23,7 +23,7 @@ class Commands(
 ) {
     @Command
     fun download(
-        @Option(longName = "url", shortName = 'u')
+        @Option(longName = "url", shortName = 'u', required = true)
         @Size(min = 1)
         urls: List<@ValidSpotifyUrl String>,
         @Option(longName = "dry-run", shortName = 'd', required = false, defaultValue = "false") dryRun: Boolean,
@@ -53,21 +53,5 @@ class Commands(
             .asSequence()
             .mapToTracks(compositeResolver)
             .forEach { appendTrackUrl(it, file) }
-    }
-
-    @Command
-    fun downloadFile(
-        @Option(longName = "file", shortName = 'f') filename: String,
-        @Option(longName = "delete-after", required = false, defaultValue = "false") deleteAfter: Boolean,
-    ) {
-        logger.info { "Downloading from $filename" }
-        val tracks = fileResolver.resolveTracks(filename)
-        if (deleteAfter) {
-            File(filename).delete()
-        }
-        val count =
-            trackDownloaderService
-                .download(tracks, false)
-        logger.info { "Downloaded $count track(s)" }
     }
 }

@@ -1,5 +1,6 @@
 package com.serkank.spotifydown.validator
 
+import com.serkank.spotifydown.FILE_PREFIX
 import com.serkank.spotifydown.SPOTIFY_URL_REGEX
 import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
+import java.io.File
 import java.net.URLEncoder
 import kotlin.reflect.KClass
 
@@ -51,6 +53,16 @@ class SpotifyUrlValidator(
         context: ConstraintValidatorContext,
     ): Boolean {
         context.disableDefaultConstraintViolation()
+        if (value.startsWith(FILE_PREFIX)) {
+            val file = File(value.removePrefix(FILE_PREFIX))
+            if (file.exists()) {
+                return true
+            } else {
+                context.buildConstraintViolationWithTemplate("$value not found").addConstraintViolation()
+                return false
+            }
+        }
+
         if (!value.matches(SPOTIFY_URL_REGEX)) {
             context.buildConstraintViolationWithTemplate(INVALID_SPOTIFY_URL).addConstraintViolation()
             return false
@@ -71,7 +83,6 @@ class SpotifyUrlValidator(
         when (status) {
             OK -> {
                 return true
-                // Valid do nothing
             }
 
             BAD_REQUEST -> {
