@@ -11,11 +11,13 @@ import com.serkank.spotifydown.model.Url
 import io.mockk.every
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import reactor.core.publisher.Flux.empty
 import xyz.gianlu.librespot.core.Session
 import kotlin.test.Test
 import kotlin.test.assertSame
 
+@ActiveProfiles("test")
 @SpringBootTest
 class CompositeResolverTest {
     val id: String = "ID"
