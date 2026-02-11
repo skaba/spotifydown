@@ -8,17 +8,16 @@ data class Url(
     val id: String,
 ) {
     companion object {
-        operator fun invoke(url: String): Url {
-            return if (url.startsWith(FILE_PREFIX)) {
+        operator fun invoke(url: String): Url =
+            if (url.startsWith(FILE_PREFIX)) {
                 Url(Type.FILE, url.removePrefix(FILE_PREFIX))
             } else {
                 val matchResult = SPOTIFY_URL_REGEX.find(url)
                 val type =
                     enumValueOf<Type>(requireNotNull(matchResult) { "Invalid Spotify URL: $url" }.groupValues[1].uppercase())
                 val id = matchResult.groupValues[2]
-                return Url(type, id)
+                Url(type, id)
             }
-        }
     }
 
     override fun toString(): String = "https://open.spotify.com/${type.name.lowercase()}/${this.id}"

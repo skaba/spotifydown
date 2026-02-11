@@ -7,28 +7,14 @@ import java.io.File
 
 @Configuration
 class Config {
-    @Bean(destroyMethod = "close")
+    @Bean
     fun session(): Session {
-        // val credentialsFile =
-        // credentialsFile.createNewFile()
         val conf =
             Session.Configuration
                 .Builder()
                 .setStoreCredentials(true)
                 .setStoredCredentialsFile(File(System.getProperty("user.home"), ".spotify_down"))
                 .setCacheEnabled(false)
-                /*.setStoreCredentials(true)
-                .setStoredCredentialsFile()
-                .setTimeSynchronizationMethod()
-                .setTimeManualCorrection()
-                .setProxyEnabled()
-                .setProxyType()
-                .setProxyAddress()
-                .setProxyPort()
-                .setProxyAuth()
-                .setProxyUsername()
-                .setProxyPassword()
-                .setRetryOnChunkError()                 */
                 .build()
         return Session
             .Builder(conf)

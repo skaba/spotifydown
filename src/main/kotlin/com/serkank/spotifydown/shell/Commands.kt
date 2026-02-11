@@ -3,7 +3,6 @@ package com.serkank.spotifydown.shell
 import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
-import com.serkank.spotifydown.service.resolver.FileResolver
 import com.serkank.spotifydown.validator.ValidSpotifyUrl
 import com.serkank.spotifydown.writeToFile
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -12,7 +11,6 @@ import org.springframework.shell.core.command.annotation.Command
 import org.springframework.shell.core.command.annotation.Option
 import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.toFlux
-import java.io.File
 import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}

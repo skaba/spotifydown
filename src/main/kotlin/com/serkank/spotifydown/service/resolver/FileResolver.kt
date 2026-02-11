@@ -3,7 +3,6 @@ package com.serkank.spotifydown.service.resolver
 import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.model.Track
 import com.serkank.spotifydown.model.Type.FILE
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Flux.fromStream

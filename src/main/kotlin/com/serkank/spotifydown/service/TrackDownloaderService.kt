@@ -42,7 +42,6 @@ class TrackDownloaderService(
                     }
             }, 5)
             .count()
-            .doFinally { session.close() }
     }
 
     private fun download(

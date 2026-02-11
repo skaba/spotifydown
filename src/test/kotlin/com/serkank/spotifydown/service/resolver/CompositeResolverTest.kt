@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import reactor.core.publisher.Flux.empty
 import xyz.gianlu.librespot.core.Session
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 @SpringBootTest
