@@ -26,6 +26,10 @@ jobs:
     - name: Build Librespot snapshot
       working-directory: ./librespot-java
       run: mvn --batch-mode --update-snapshots -Dmaven.test.failure.ignore=true -DskipTests clean install
+    - name: create Deb package
+      run: make-springboot-deb .
+    - name: create RPM package
+      run: make-springboot-rpm .
     - name: Build with Maven
       run: mvn --batch-mode --update-snapshots -Dmaven.test.failure.ignore=true clean test
     - name: Publish Test Report
