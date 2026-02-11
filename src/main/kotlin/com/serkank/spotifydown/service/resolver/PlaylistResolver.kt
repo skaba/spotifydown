@@ -12,7 +12,7 @@ import xyz.gianlu.librespot.metadata.PlaylistId
 @Service
 class PlaylistResolver(
     private val session: Session,
-) : AppearsInFile {
+) : Resolver {
     override val type = PLAYLIST
 
     override fun resolveTracks(id: String): Flux<Track> =

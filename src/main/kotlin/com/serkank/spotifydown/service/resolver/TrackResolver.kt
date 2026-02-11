@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 
 @Service
-class TrackResolver : AppearsInFile {
+class TrackResolver : Resolver {
     override val type = TRACK
 
     override fun resolveTracks(id: String): Flux<Track> = Track(id).toFlux()
