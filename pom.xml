@@ -17,7 +17,7 @@
     </issueManagement>
     <groupId>com.serkank</groupId>
     <artifactId>spotifydown</artifactId>
-    <version>0.0.13-SNAPSHOT</version>
+    <version>0.0.13</version>
     <name>spotifydown</name>
  	   <description>Spotify downloader</description>
     <properties>
