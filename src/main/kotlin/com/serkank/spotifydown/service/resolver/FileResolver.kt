@@ -20,6 +20,7 @@ class FileResolver(
         using({ File(id).bufferedReader() }, { fromStream(it.lines()) }, BufferedReader::close)
             .map(String::trim)
             .filter(String::isNotBlank)
+            .filter { !it.startsWith("#") }
             .distinct()
             .mapToTracks(compositeResolver)
 }

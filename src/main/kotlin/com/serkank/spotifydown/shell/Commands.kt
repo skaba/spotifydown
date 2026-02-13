@@ -44,14 +44,14 @@ class Commands(
         @Option(longName = "url", shortName = 'u', required = true)
         @Size(min = 1)
         urls: List<@ValidSpotifyUrl String>,
-        @Option(longName = "file", shortName = 'f') filename: String,
+        @Option(longName = "file", shortName = 'f', required = true) filename: String,
     ) {
         logger.info { "Dumping tracks ${urls.joinToString()} to $filename" }
         val file = Path.of(filename)
         urls
             .toFlux()
             .mapToTracks(compositeResolver)
-            .map { it.url }
+            .map { "${it.url}" }
             .writeToFile(file)
             .block()
     }
