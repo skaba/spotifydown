@@ -3,6 +3,7 @@ package com.serkank.spotifydown.shell
 import com.serkank.spotifydown.mapToTracks
 import com.serkank.spotifydown.service.TrackDownloaderService
 import com.serkank.spotifydown.service.resolver.CompositeResolver
+import com.serkank.spotifydown.subscribeAndWait
 import com.serkank.spotifydown.validator.ValidSpotifyUrl
 import com.serkank.spotifydown.writeToFile
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -32,11 +33,9 @@ class Commands(
             urls
                 .toFlux()
                 .mapToTracks(compositeResolver)
-        val count =
-            trackDownloaderService
-                .download(tracks, dryRun)
-                .block()
-        logger.info { "Downloaded $count track(s)" }
+        trackDownloaderService
+            .download(tracks, dryRun)
+            .subscribeAndWait { count -> logger.info { "Downloaded $count tracks" } }
     }
 
     @Command
@@ -53,6 +52,6 @@ class Commands(
             .mapToTracks(compositeResolver)
             .map { "${it.url}" }
             .writeToFile(file)
-            .block()
+            .subscribeAndWait()
     }
 }

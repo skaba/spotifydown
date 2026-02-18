@@ -5,6 +5,7 @@ import com.serkank.spotifydown.model.Url
 import com.serkank.spotifydown.service.resolver.CompositeResolver
 import com.spotify.metadata.Metadata
 import com.spotify.playlist4.Playlist4ApiProto
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.ResolvableType
 import org.springframework.core.codec.CharSequenceEncoder
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -20,12 +21,14 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.CREATE_NEW
 import java.nio.file.StandardOpenOption.WRITE
+import java.util.concurrent.CountDownLatch
 
 const val SPOTIFY_URL_PATTERN = """https?://[^/]*open\.spotify\.com/(track|playlist|album)/([^\s?]+)(\?.*)?"""
 const val FILE_PREFIX = "file://"
 val SPOTIFY_URL_REGEX = SPOTIFY_URL_PATTERN.toRegex()
 val INVALID_FILENAME_CHARS = "[<>:\"/|?*]".toRegex()
 private val MISSING_FILE = File("missing.txt")
+private val logger = KotlinLogging.logger {}
 
 fun logMissing(track: Track): Mono<Track> =
     runBlocking {
@@ -69,3 +72,17 @@ val Metadata.Track.id get() = this.uri.split(':').last()
 val Playlist4ApiProto.Item.id get() = this.uri.split(':').last()
 
 fun <T : Any> T.toFlux(): Flux<T> = Flux.just(this)
+
+fun <T : Any> Mono<T>.subscribeAndWait(consumer: (T) -> Unit = {}) {
+    val latch = CountDownLatch(1)
+    val disposable =
+        subscribe({ value -> consumer(value) }, { e ->
+            run {
+                logger.error { "${e::class.java.simpleName} ${e.message}" }
+                logger.debug(e) { "${e::class.java.simpleName} ${e.message}" }
+                latch.countDown()
+            }
+        }, { latch.countDown() })
+    latch.await()
+    disposable.dispose()
+}
