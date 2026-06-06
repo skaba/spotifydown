@@ -8,6 +8,7 @@ import com.serkank.spotifydown.validator.ValidSpotifyUrl
 import com.serkank.spotifydown.writeToFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Size
+import org.springframework.shell.core.command.annotation.Arguments
 import org.springframework.shell.core.command.annotation.Command
 import org.springframework.shell.core.command.annotation.Option
 import org.springframework.stereotype.Component
@@ -23,9 +24,9 @@ class Commands(
 ) {
     @Command
     fun download(
-        @Option(longName = "url", shortName = 'u', required = true)
+        @Arguments
         @Size(min = 1)
-        urls: List<@ValidSpotifyUrl String>,
+        urls: Array<@ValidSpotifyUrl String>,
         @Option(longName = "dry-run", shortName = 'd', defaultValue = "false") dryRun: Boolean,
     ) {
         logger.info { "Downloading ${urls.joinToString()}" }
@@ -40,7 +41,7 @@ class Commands(
 
     @Command
     fun dump(
-        @Option(longName = "url", shortName = 'u', required = true)
+        @Arguments
         @Size(min = 1)
         urls: List<@ValidSpotifyUrl String>,
         @Option(longName = "file", shortName = 'f', required = true) filename: String,
